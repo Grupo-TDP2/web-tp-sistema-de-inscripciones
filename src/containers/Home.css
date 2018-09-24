@@ -1,0 +1,18 @@
+.Home .lander {
+    padding: 80px 0;
+    text-align: center;
+  }
+  
+  .Home .lander h1 {
+    font-family: 'Lobster', cursive;
+    font-weight: 600;
+    font-size: 70px;
+  }
+
+  .Home .lander p {
+    font-size: 16px;
+  }
+  
+  .Home .lander p {
+    color: #999;
+  }
