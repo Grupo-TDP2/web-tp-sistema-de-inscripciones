@@ -82,7 +82,14 @@ export default class DepartmentCoursesTable extends Component {
   }
 
   handleEditClick(cell, row) {
-    this.displayErrorToastr("Funcionalidad habilitada proximamente.")
+    this.setState({ 
+        showModal: true,
+        modalProps: {
+            mode: 'edit',
+            handleClose: this.handleModalClose,
+            courseInfo: row
+        }
+    });
   }
 
   handleDeleteClick(cell, row) {

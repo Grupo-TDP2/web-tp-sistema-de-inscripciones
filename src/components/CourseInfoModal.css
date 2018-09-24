@@ -1,0 +1,53 @@
+.formControl {
+    margin-right: 10px;
+    margin-left: 10px;
+}
+
+.formGroupFlex {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.formGroupFlexItem {
+    align-self: center;
+}
+
+.formFlexItem {
+    align-self: center;
+}
+
+.formFlex {
+    display: flex;
+    flex-direction: column;
+}
+
+.formGroupHalf {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.formGroupHalfItem {
+    margin-bottom: 10px;
+}
+
+.itemList {
+    padding-left: 17px;
+}
+
+.controlLabel {
+    font-family: 'Raleway', cursive;
+    font-size: 18px;
+}
+
+.flexRow {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.flexRowItem {
+    align-items: flex-start;
+    margin-right: 7px;
+}
