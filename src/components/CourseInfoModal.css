@@ -33,12 +33,13 @@
 }
 
 .itemList {
-    padding-left: 17px;
+    padding-left: 20px;
+    font-size: 15px;
 }
 
 .controlLabel {
     font-family: 'Raleway', cursive;
-    font-size: 18px;
+    font-size: 15px;
 }
 
 .flexRow {
@@ -50,4 +51,12 @@
 .flexRowItem {
     align-items: flex-start;
     margin-right: 7px;
+}
+
+.modalTitle {
+    font-size: 23px;
+}
+
+.noMarginBottom {
+    margin-bottom: 0px;
 }

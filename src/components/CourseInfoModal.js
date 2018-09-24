@@ -20,10 +20,10 @@ export default class CourseInfoModal extends React.Component {
           <Modal bsSize="large" show={this.state.show} onHide={this.props.childProps.handleClose}>
             <Modal.Header closeButton>
                 {this.props.childProps.mode === 'new'
-                ? <Modal.Title>
+                ? <Modal.Title className="modalTitle">
                     Crear Nuevo Curso
                     </Modal.Title>
-                : <Modal.Title>
+                : <Modal.Title className="modalTitle">
                     Editar Curso
                     </Modal.Title>
                 }
@@ -31,17 +31,17 @@ export default class CourseInfoModal extends React.Component {
             <Modal.Body>
             <Form className="formFlex">
                 <FormGroup className="formGroupFlex" controlId="main">
-                    <ControlLabel className="controlLabel formGroupFlexItem">Materia</ControlLabel>{' '}
+                    <ControlLabel className="controlLabel formGroupFlexItem noMarginBottom">Materia</ControlLabel>{' '}
                     <FormControl className="formControl formGroupFlexItem" componentClass="select" placeholder="select">
                         <option value="select">select</option>
                         <option value="other">...</option>
                     </FormControl>
-                    <ControlLabel className="controlLabel formGroupFlexItem">Sede</ControlLabel>{' '}
+                    <ControlLabel className="controlLabel formGroupFlexItem noMarginBottom">Sede</ControlLabel>{' '}
                     <FormControl className="formControl formGroupFlexItem" componentClass="select" placeholder="select">
                         <option value="lasHeras">Las Heras</option>
                         <option value="paseoColon">Paseo Colon</option>
                     </FormControl>
-                    <ControlLabel className="controlLabel formGroupFlexItem">Aula</ControlLabel>{' '}
+                    <ControlLabel className="controlLabel formGroupFlexItem noMarginBottom">Aula</ControlLabel>{' '}
                     <FormControl
                         className="formControl formGroupFlexItem"
                         type="text"
