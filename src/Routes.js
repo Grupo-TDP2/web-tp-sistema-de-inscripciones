@@ -6,6 +6,7 @@ import AppliedRoute from "./components/AppliedRoute";
 import Login from "./containers/Login";
 import TeacherCourses from "./containers/TeacherCourses";
 import CourseStudents from "./containers/CourseStudents";
+import DepartmentCourses from "./containers/DepartmentCourses";
 
 export default ({ childProps }) =>
   <Switch>
@@ -13,6 +14,7 @@ export default ({ childProps }) =>
     <AppliedRoute path="/login" exact component={Login} props={childProps} />
     <AppliedRoute path="/teacherCourses" exact component={TeacherCourses} props={childProps} />
     <AppliedRoute path="/courseStudents" exact component={CourseStudents} props={childProps} />
+    <AppliedRoute path="/departmentCourses" exact component={DepartmentCourses} props={childProps} />
     { /* Finally, catch all unmatched routes */ }
     <Route component={NotFound} />
   </Switch>;

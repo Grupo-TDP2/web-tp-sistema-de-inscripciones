@@ -40,7 +40,7 @@ export default class Login extends Component {
   handleSubmit = async event => {
     event.preventDefault();
 
-    const authFunction = token => this.props.userHasAuthenticated(true, token);
+    const authFunction = (token, role) => this.props.userHasAuthenticated(true, token, role);
     const goToRoute = route => this.props.history.push(route);
     const setIsLoadingFlag = flag => this.setState({ isLoading: flag});
     const errorToastr = message => this.displayErrorToastr(message);
@@ -67,10 +67,17 @@ export default class Login extends Component {
       alert(e.message);
     }*/
 
-
     setIsLoadingFlag(false);
-    authFunction("123");
-    goToRoute("/");
+
+    if (this.state.username === "departamento") {
+      authFunction("123", "departamento");
+      goToRoute("/departmentCourses");
+    } else if (this.state.username === "docente") {
+      authFunction("123", "docente");
+      goToRoute("/teacherCourses");
+    } else {
+      errorToastr("Hubo un error al iniciar sesion. Intente nuevamente.");
+    }
   }
 
   render() {
