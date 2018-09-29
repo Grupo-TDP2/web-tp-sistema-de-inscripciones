@@ -98,7 +98,7 @@ export default class StudentsTable extends Component {
           className="toast-top-right"
         />
         <BootstrapTable ref='coursesTable' data={ this.state.students } options={ options }
-                    headerStyle={ { background: '#f8f8f8' } } pagination search={ true }>
+                    headerStyle={ { background: '#f8f8f8' } } pagination search={ true } searchPlaceholder={'Buscar'}>
             <TableHeaderColumn dataField='studentID' hidden={ true } width='80' isKey={ true } headerAlign='center' dataAlign='center'>ID Alumno</TableHeaderColumn>
             <TableHeaderColumn dataField='name' headerAlign='center' dataAlign='center'>Nombre</TableHeaderColumn>
             <TableHeaderColumn dataField='studentNumber' width='180' headerAlign='center' dataAlign='center'>Padron</TableHeaderColumn>

@@ -25,3 +25,38 @@
     margin-bottom: auto;
     align-self: center;
 }
+
+.teacher-flex {
+    display: flex;
+    flex-direction: row;
+}
+
+.teacher-flex-item {
+    align-items: center;
+}
+
+.teacher-btn {
+    padding: 0px;
+    border: 0px;
+    height: 14px;
+    width: 14px;
+    margin-left: 2px;
+}
+
+.teacher-name {
+    margin-bottom: 3px;
+}
+
+.teacher-flex-aux {
+    display: flex;
+    flex-direction: column;
+}
+
+.teacher-flex-aux-item {
+    align-self: center;
+}
+
+.teacher-more-btn {
+    font-size: 12px;
+    margin-top: 10px;
+}

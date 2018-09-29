@@ -92,7 +92,7 @@ export default class CoursesTable extends Component {
           className="toast-top-right"
         />
         <BootstrapTable ref='coursesTable' data={ this.state.courses } options={ options }
-                    headerStyle={ { background: '#f8f8f8' } } pagination search={ true }>
+                    headerStyle={ { background: '#f8f8f8' } } pagination search={ true } searchPlaceholder={'Buscar'}>
             <TableHeaderColumn dataField='courseID' width='80' isKey={ true } headerAlign='center' dataAlign='center'>Curso</TableHeaderColumn>
             <TableHeaderColumn dataField='subject' headerAlign='center' dataAlign='center'>Materia</TableHeaderColumn>
             <TableHeaderColumn dataField='schedule' width='180' headerAlign='center' dataAlign='center' tdStyle={ { whiteSpace: 'normal' } }>Horario</TableHeaderColumn>
