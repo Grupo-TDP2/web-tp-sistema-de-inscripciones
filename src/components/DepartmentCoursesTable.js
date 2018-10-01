@@ -16,6 +16,13 @@ export default class DepartmentCoursesTable extends Component {
 
   constructor(props) {
     super(props);
+
+    this.positions = {
+      'course_chief': 'Titular',
+      'practice_chief': 'Jefe Trabajos Prácticos',
+      'first_assistant': 'Asistente Primero',
+      'second_assistant': 'Asistente Segundo'
+    }
     
     this.state = {
         courses: [],
@@ -67,6 +74,7 @@ export default class DepartmentCoursesTable extends Component {
     const errorToastr = message => this.displayErrorToastr(message);
     const setLoaderMsg = mLoaderMsg => this.setState({ loaderMsg: mLoaderMsg });
     const setCourses = mCourses => this.setState({courses: mCourses});
+    const getPositionMappings = () => this.positions;
 
     await axios({
       method:'get',
@@ -84,9 +92,22 @@ export default class DepartmentCoursesTable extends Component {
                 id: course.id,
                 courseID: course.name,
                 subject: subject.name,
-                teachers: course.teachers,
                 subjectID: subject.id
               }
+
+              let mTeachers = [];
+
+              course.teacher_courses.forEach(teacherCourse => {
+                mTeachers.push({
+                  position: teacherCourse.teaching_position,
+                  id: teacherCourse.teacher.id,
+                  first_name: teacherCourse.teacher.first_name,
+                  last_name: teacherCourse.teacher.last_name,
+                  positionMapped: getPositionMappings()[teacherCourse.teaching_position]
+                })
+              });
+
+              mCourse.teachers = mTeachers;
 
               mCourses.push(mCourse);
             })

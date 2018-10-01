@@ -107,7 +107,7 @@ export default class TeachersModal extends Component {
           return (
             <tr key={teacher.id}>
               <td>{teacher.first_name + " " + teacher.last_name}</td>
-              <td>Titular</td>
+              <td>{teacher.positionMapped}</td>
             </tr>
           );
       });
