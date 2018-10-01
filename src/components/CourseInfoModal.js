@@ -1,8 +1,8 @@
 import React, { Component } from "react";
-import {Modal, Popover, Tooltip, OverlayTrigger, Button, Form, FormGroup, ControlLabel, FormControl, Glyphicon} from 'react-bootstrap';
+import {Modal, Button, Form, FormGroup, ControlLabel, FormControl, Glyphicon} from 'react-bootstrap';
 import './CourseInfoModal.css';
 
-export default class CourseInfoModal extends React.Component {
+export default class CourseInfoModal extends Component {
     constructor(props, context) {
       super(props, context);
   
@@ -70,7 +70,7 @@ export default class CourseInfoModal extends React.Component {
             </Form>
             </Modal.Body>
             <Modal.Footer>
-              <Button onClick={this.props.childProps.handleClose}>Close</Button>
+              <Button onClick={this.props.childProps.handleClose}>Cerrar</Button>
             </Modal.Footer>
           </Modal>
         </div>

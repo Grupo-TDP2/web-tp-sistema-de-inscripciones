@@ -1,0 +1,16 @@
+.teachers-modal-main-flex {
+    display: flex;
+    flex-direction: column;
+}
+
+.teachers-modal-main-item {
+    align-self: center;
+}
+
+.item-margin {
+    margin-left: 10px;
+}
+
+.current-teachers-list {
+    margin-top: 15px;
+}

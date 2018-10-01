@@ -7,8 +7,7 @@ import { ToastContainer } from "react-toastr";
 import "./Toastr.css";
 import "./CoursesTable.css";
 import API_URI from "../config/GeneralConfig.js";
-
-import JSONResponse from "../config/JSONResponse";
+import teacherAuthToken from "../config/AuthToken.js";
 
 let container;
 
@@ -17,25 +16,8 @@ export default class CoursesTable extends Component {
   constructor(props) {
     super(props);
 
-    console.log(JSONResponse.data);
-
     this.state = {
-        courses: [
-          {
-            courseID: '508',
-            subject: '75.12 Análisis Númerico I',
-            schedule: 'Lunes 19.00 - 22.00\nJueves 19.00 - 22.00',
-            location: 'Las Heras',
-            classroom: '203'
-          },
-          {
-            courseID: '510',
-            subject: '75.40 Introducción a los Sistemas Distribuidos',
-            schedule: 'Martes 19.00 - 22.00\nMiercoles 19.00 - 22.00',
-            location: 'Paseo Colon',
-            classroom: '208'
-          }
-        ],
+        courses: [],
         loaderMsg: 'Cargando la informacion...',
         redirect: false,
         redirectTo: ''
@@ -47,7 +29,6 @@ export default class CoursesTable extends Component {
   }
 
   async componentDidMount() {
-    this.setState({loaderMsg: 'No hay datos disponibles.'});
     const errorToastr = message => this.displayErrorToastr(message);
     const setLoaderMsg = mLoaderMsg => this.setState({ loaderMsg: mLoaderMsg });
     const setCourses = mCourses => this.setState({courses: mCourses});
@@ -55,10 +36,14 @@ export default class CoursesTable extends Component {
     await axios({
       method:'get',
       url: API_URI + '/teachers/me/courses',
-      headers: {'Authorization': 'eyJhbGciOiJIUzI1NiJ9.eyJkYXRhIjp7ImlkIjoyfSwiZXhwIjoxNTQzNTMyMDkyfQ.snEe9NZkCDdKsB9HNJrWAuXg-Q92vnSW4EImXXQIfCE'}
+      headers: {'Authorization': teacherAuthToken}
       })
         .then(function(response) {
           console.log(response);
+
+          if (response.data.length === 0) {
+            setLoaderMsg("No hay datos disponibles.");
+          }
 
           let mCourses = [];
     
@@ -66,24 +51,28 @@ export default class CoursesTable extends Component {
             let mCourse = {
               id: course.id,
               courseID: course.name,
-              subject: course.subject.name,
-              location: '',
-              classroom: ''
+              subject: course.subject.name
             }
 
             if (course.lesson_schedules.length > 0) {
               let mSchedule = '';
+              let mLocation = '';
+              let mClassroom = '';
               
               course.lesson_schedules.forEach(lessonSchedule => {
                 let mStartHour = lessonSchedule.hour_start.split('T')[1].substr(0,5);
                 let mEndHour = lessonSchedule.hour_end.split('T')[1].substr(0,5);
 
                 mSchedule = mSchedule + lessonSchedule.day + ' ' + mStartHour + ' - ' + mEndHour;
+                mLocation = mLocation + lessonSchedule.classroom.building.name + '\n';
+                mClassroom = mClassroom + lessonSchedule.classroom.floor + lessonSchedule.classroom.number + '\n';
 
                 mSchedule = mSchedule + '\n';
               });
 
               mCourse.schedule = mSchedule;
+              mCourse.location = mLocation;
+              mCourse.classroom = mClassroom;
             } else {
               mCourse.schedule = '';
             }
@@ -192,8 +181,8 @@ export default class CoursesTable extends Component {
             <TableHeaderColumn dataField='courseID' width='80' isKey={ true } headerAlign='center' dataAlign='center'>Curso</TableHeaderColumn>
             <TableHeaderColumn dataField='subject' headerAlign='center' dataAlign='center'>Materia</TableHeaderColumn>
             <TableHeaderColumn dataField='schedule' width='180' headerAlign='center' dataAlign='center' tdStyle={ { whiteSpace: 'normal' } }>Horario</TableHeaderColumn>
-            <TableHeaderColumn dataField='location' width='120' headerAlign='center' dataAlign='center'>Sede</TableHeaderColumn>
-            <TableHeaderColumn dataField='classroom' width='80' headerAlign='center' dataAlign='center'>Aula</TableHeaderColumn>
+            <TableHeaderColumn dataField='location' width='55' headerAlign='center' dataAlign='center' tdStyle={ { whiteSpace: 'normal' } }>Sede</TableHeaderColumn>
+            <TableHeaderColumn dataField='classroom' width='60' headerAlign='center' dataAlign='center' tdStyle={ { whiteSpace: 'normal' } }>Aula</TableHeaderColumn>
             <TableHeaderColumn dataField="button" width='100' headerAlign='center' dataAlign='center' dataFormat={buttonFormatter}>Alumnos</TableHeaderColumn>
         </BootstrapTable>
       </div>

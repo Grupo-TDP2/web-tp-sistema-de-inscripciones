@@ -18,75 +18,7 @@ export default class DepartmentCoursesTable extends Component {
     super(props);
     
     this.state = {
-        courses: [
-          {
-            courseID: '508',
-            subject: '75.12 Análisis Númerico I',
-            schedule: 'Lunes 19.00 - 22.00\nJueves 19.00 - 22.00',
-            location: 'Las Heras',
-            classroom: '203',
-            teachers: [
-              {
-                name: 'Gonzalo Merino',
-                type: 'Titular'
-              },
-              {
-                name: 'Leandro Masello',
-                type: 'Ayudante TP'
-              }
-            ]
-          },
-          {
-            courseID: '510',
-            subject: '75.40 Introducción a los Sistemas Distribuidos',
-            schedule: 'Martes 19.00 - 22.00\nMiercoles 19.00 - 22.00',
-            location: 'Paseo Colon',
-            classroom: '208',
-            teachers: [
-              {
-                name: 'Gonzalo Merino',
-                type: 'Titular'
-              },
-              {
-                name: 'Tobias Bianchi',
-                type: 'Colaborador'
-              },
-              {
-                name: 'Leandro Masello',
-                type: 'Ayudante TP'
-              },
-              {
-                name: 'Juan Costamagna',
-                type: 'Colaborador'
-              }
-            ]
-          },
-          {
-            courseID: '614',
-            subject: '75.40 Introducción a los Sistemas Distribuidos',
-            schedule: '',
-            location: 'Paseo Colon',
-            classroom: '208',
-            teachers: [
-              {
-                name: 'Gonzalo Merino',
-                type: 'Titular'
-              },
-              {
-                name: 'Leandro Masello',
-                type: 'Ayudante TP'
-              }
-            ]
-          },
-          {
-            courseID: '383',
-            subject: '75.12 Análisis Númerico I',
-            schedule: '',
-            location: 'Paseo Colon',
-            classroom: '208',
-            teachers: []
-          }
-        ],
+        courses: [],
         loaderMsg: 'Cargando la informacion...',
         redirect: false,
         redirectTo: '',
@@ -106,10 +38,134 @@ export default class DepartmentCoursesTable extends Component {
     this.handleTeachersMoreInfoClick = this.handleTeachersMoreInfoClick.bind(this);
     this.addNewCourse = this.addNewCourse.bind(this);
     this.handleTeacherDeleteClick = this.handleTeacherDeleteClick.bind(this);
+    this.handleAddTeacher = this.handleAddTeacher.bind(this);
+    this.loadCoursesForTeacher = this.loadCoursesForTeacher.bind(this);
+    this.loadCourses = this.loadCourses.bind(this);
   }
 
-  componentDidMount() {
+  async componentDidMount() {
     this.setState({loaderMsg: 'No hay datos disponibles.'});
+    const setLoaderMsg = mLoaderMsg => this.setState({ loaderMsg: mLoaderMsg });
+    
+    //ARGERICH
+    //const authTokenArgerich = 'eyJhbGciOiJIUzI1NiJ9.eyJkYXRhIjp7ImlkIjo1fSwiZXhwIjoxNTQzNjA1ODg0fQ.vYf2ZbJumUyTNcEtL-b5A2dWS03i6RYRL-EZWZ7VmOs';
+    //FONTELA
+    //const authTokenFontela = 'eyJhbGciOiJIUzI1NiJ9.eyJkYXRhIjp7ImlkIjo0fSwiZXhwIjoxNTQzNjA1ODY5fQ.pr8t3BjjIXttgRXSZWGcrN8iFpxPmVzD-6E1JIry44I';
+
+    //this.loadCoursesForTeacher(authTokenArgerich);
+    //this.loadCoursesForTeacher(authTokenFontela);
+
+    this.loadCourses();
+
+
+    if (this.state.courses.length === 0) {
+      setLoaderMsg("No hay datos disponibles.");
+    }
+  }
+
+  async loadCourses() {
+    const errorToastr = message => this.displayErrorToastr(message);
+    const setLoaderMsg = mLoaderMsg => this.setState({ loaderMsg: mLoaderMsg });
+    const setCourses = mCourses => this.setState({courses: mCourses});
+
+    await axios({
+      method:'get',
+      url: API_URI + '/departments/me/courses',
+      headers: {'Authorization': 'eyJhbGciOiJIUzI1NiJ9.eyJkYXRhIjp7ImlkIjoyfSwiZXhwIjoxNTQzNjA1NjI2fQ.BJBTtcwN6-s_vT3zVz_NFBykRr8ZhrtkRSRAn_2bNmo'}
+      })
+        .then(function(response) {
+          console.log(response);
+
+          let mCourses = [];
+    
+          response.data.forEach(subject => {
+            subject.courses.forEach(course => {
+              let mCourse = {
+                id: course.id,
+                courseID: course.name,
+                subject: subject.name,
+                teachers: course.teachers,
+                subjectID: subject.id
+              }
+
+              mCourses.push(mCourse);
+            })
+          });
+
+          setCourses(mCourses);
+        })
+        .catch(function (error) {
+          console.log(error);
+          errorToastr("No se pudieron cargar los datos.");
+          setLoaderMsg("No se pudieron cargar los datos.");
+        });
+  }
+
+  async loadCoursesForTeacher(authToken) {
+    const errorToastr = message => this.displayErrorToastr(message);
+    const setLoaderMsg = mLoaderMsg => this.setState({ loaderMsg: mLoaderMsg });
+    const setCourses = mCourses => {
+      let updatedCourses = this.state.courses;
+      mCourses.forEach(course => {
+        if (this.state.courses.every(currentCourse => currentCourse.id !== course.id)) {
+          updatedCourses.push(course);
+        }  
+      });
+      this.setState({ courses: updatedCourses });
+    };
+
+    await axios({
+      method:'get',
+      url: API_URI + '/teachers/me/courses',
+      headers: {'Authorization': authToken}
+      })
+        .then(function(response) {
+          console.log(response);
+
+          let mCourses = [];
+    
+          response.data.forEach(course => {
+            let mCourse = {
+              id: course.id,
+              courseID: course.name,
+              subject: course.subject.name,
+              teachers: course.teachers,
+              subjectID: course.subject.id
+            }
+
+            if (course.lesson_schedules.length > 0) {
+              let mSchedule = '';
+              let mLocation = '';
+              let mClassroom = '';
+              
+              course.lesson_schedules.forEach(lessonSchedule => {
+                let mStartHour = lessonSchedule.hour_start.split('T')[1].substr(0,5);
+                let mEndHour = lessonSchedule.hour_end.split('T')[1].substr(0,5);
+
+                mSchedule = mSchedule + lessonSchedule.day + ' ' + mStartHour + ' - ' + mEndHour;
+                mLocation = mLocation + lessonSchedule.classroom.building.name + '\n';
+                mClassroom = mClassroom + lessonSchedule.classroom.floor + lessonSchedule.classroom.number + '\n';
+
+                mSchedule = mSchedule + '\n';
+              });
+
+              mCourse.schedule = mSchedule;
+              mCourse.location = mLocation;
+              mCourse.classroom = mClassroom;
+            } else {
+              mCourse.schedule = '';
+            }
+            
+            mCourses.push(mCourse);
+          });
+
+          setCourses(mCourses);
+        })
+        .catch(function (error) {
+          console.log(error);
+          errorToastr("No se pudieron cargar los datos.");
+          setLoaderMsg("No se pudieron cargar los datos.");
+        });
   }
 
   displayErrorToastr(message) {
@@ -123,18 +179,19 @@ export default class DepartmentCoursesTable extends Component {
   }
 
   handleEditClick(cell, row) {
-    this.setState({ 
+    /*this.setState({ 
         showCourseModal: true,
         courseModalProps: {
             mode: 'edit',
             handleClose: this.handleCourseModalClose,
             courseInfo: row
         }
-    });
+    });*/
+    this.displayErrorToastr("Funcionalidad habilitada proximamente.");
   }
 
   handleDeleteClick(cell, row) {
-    this.displayErrorToastr("Funcionalidad habilitada proximamente.")
+    this.displayErrorToastr("Funcionalidad habilitada proximamente.");
   }
 
   addNewCourse(course) {
@@ -142,14 +199,15 @@ export default class DepartmentCoursesTable extends Component {
   }
 
   handleNewCourseClick() {
-    this.setState({ 
+    /*this.setState({ 
         showCourseModal: true,
         courseModalProps: {
             mode: 'new',
             handleClose: this.handleCourseModalClose,
             addNewCourse: this.addNewCourse
         } 
-    });
+    });*/
+    this.displayErrorToastr("Funcionalidad habilitada proximamente.");
   }
 
   handleCourseModalClose() {
@@ -161,11 +219,43 @@ export default class DepartmentCoursesTable extends Component {
 
   handleTeachersMoreInfoClick(row) {
     this.setState({ 
-      showTeachersModal: true,
-      teachersModalProps: {
-          handleClose: this.handleTeachersModalClose
-      } 
-  });
+        showTeachersModal: true,
+        teachersModalProps: {
+            handleClose: this.handleTeachersModalClose,
+            handleAddTeacher: this.handleAddTeacher,
+            teachers: row.teachers,
+            displayErrorToastr: this.displayErrorToastr,
+            courseInfo: row
+        } 
+    });
+  }
+
+  async handleAddTeacher(teacher, courseID, subjectID) {
+    const errorToastr = message => this.displayErrorToastr(message);
+
+    //DEPTO INFORMATICA
+    const staffToken = 'eyJhbGciOiJIUzI1NiJ9.eyJkYXRhIjp7ImlkIjoyfSwiZXhwIjoxNTQzNjA1NjI2fQ.BJBTtcwN6-s_vT3zVz_NFBykRr8ZhrtkRSRAn_2bNmo';
+
+    const teacherCourse = {
+      teacher_id: teacher.id,
+      teaching_position: teacher.position
+    };
+
+    await axios({
+      method:'post',
+      data: {
+          teacher_course: teacherCourse
+      },
+      url: API_URI + "/departments/me/subjects/" + subjectID + "/courses/" + courseID + "/teachers",
+      headers: {'Authorization': staffToken}
+      })
+        .then(function(response) {
+          console.log(response);
+        })
+        .catch(function (error) {
+          console.log(error);
+          errorToastr("No se pudieron cargar los datos.");
+        });
   }
 
   handleTeachersModalClose() {
@@ -188,12 +278,8 @@ export default class DepartmentCoursesTable extends Component {
     let modal;
 
     if (this.state.showCourseModal) {
-        modal = <CourseInfoModal childProps={this.state.courseModalProps} />;
-    } else {
-        modal = <div />
-    }
-
-    if (this.state.showTeachersModal) {
+      modal = <CourseInfoModal childProps={this.state.courseModalProps} />;
+    } else if (this.state.showTeachersModal) {
       modal = <TeachersModal childProps={this.state.teachersModalProps} />;
     } else {
       modal = <div />
@@ -208,13 +294,21 @@ export default class DepartmentCoursesTable extends Component {
         noDataText: this.state.loaderMsg,
         beforeShowError: (type, msg) => {
           return false;
-        }
+        },
+        sizePerPageList: [ {
+          text: '2', value: 2
+        }, {
+          text: '10', value: 10
+        }, {
+          text: 'Todos', value: this.state.courses.length
+        } ], // you can change the dropdown list for size per page
+        sizePerPage: 10
     };
 
     function buttonFormatter(cell, row){
       return (
         <div>
-            <Button className="action-button" bsStyle="primary" onClick={() => handleEditClick(cell,row)}>
+            <Button className="action-button" onClick={() => handleEditClick(cell,row)}>
                 <Glyphicon glyph="pencil" />&nbsp;
             </Button>
             <Button className="action-button" bsStyle="danger" onClick={() => handleDeleteClick(cell,row)}>
@@ -245,7 +339,7 @@ export default class DepartmentCoursesTable extends Component {
       row.teachers.forEach(teacher => {
         let teacherLastName;
 
-        teacherLastName = teacher.name.split(' ')[1];
+        teacherLastName = teacher.last_name;
 
         teacherNames = teacherNames + teacherLastName + ', ';
       });
@@ -255,8 +349,8 @@ export default class DepartmentCoursesTable extends Component {
       return (
         <div className="teacher-flex-aux">
           <div className="teacher-flex-aux-item">{teacherNames}</div>
-          <Button className="teacher-flex-aux-item teacher-more-btn" bsStyle="primary" onClick={() => handleTeachersMoreInfoClick(row)}>
-              <Glyphicon glyph="eye-open" /> Ver
+          <Button className="teacher-flex-aux-item teacher-more-btn" onClick={() => handleTeachersMoreInfoClick(row)}>
+              <Glyphicon glyph="user" /> Ver
           </Button>
         </div>
       );
@@ -279,14 +373,16 @@ export default class DepartmentCoursesTable extends Component {
             </div>
 
             <BootstrapTable ref='coursesTable' data={ this.state.courses } options={ options }
-                        headerStyle={ { background: '#f8f8f8' } } pagination search={ true } searchPlaceholder={'Buscar'}>
+                        headerStyle={ { background: '#f8f8f8' } } pagination={ true } search={ true } searchPlaceholder={'Buscar'}>
+                <TableHeaderColumn dataField='id' hidden={ true }>ID</TableHeaderColumn>
                 <TableHeaderColumn dataField='courseID' width='80' isKey={ true } headerAlign='center' dataAlign='center'>ID</TableHeaderColumn>
                 <TableHeaderColumn dataField='subject' headerAlign='center' dataAlign='center' tdStyle={ { whiteSpace: 'normal' } }>Materia</TableHeaderColumn>
                 <TableHeaderColumn dataField='schedule' width='180' headerAlign='center' dataAlign='center' tdStyle={ { whiteSpace: 'normal' } }>Horario</TableHeaderColumn>
-                <TableHeaderColumn dataField='location' width='120' headerAlign='center' dataAlign='center'>Sede</TableHeaderColumn>
-                <TableHeaderColumn dataField='classroom' width='80' headerAlign='center' dataAlign='center'>Aula</TableHeaderColumn>
+                <TableHeaderColumn dataField='location' width='55' headerAlign='center' dataAlign='center' tdStyle={ { whiteSpace: 'normal' } }>Sede</TableHeaderColumn>
+                <TableHeaderColumn dataField='classroom' width='60' headerAlign='center' dataAlign='center' tdStyle={ { whiteSpace: 'normal' } }>Aula</TableHeaderColumn>
                 <TableHeaderColumn dataField='teachers' width='280' headerAlign='center' dataAlign='center' tdStyle={ { whiteSpace: 'normal' } } dataFormat={teachersFormatter}>Docentes</TableHeaderColumn>
                 <TableHeaderColumn dataField="buttons" width='130' headerAlign='center' dataAlign='center' dataFormat={buttonFormatter}>Acciones</TableHeaderColumn>
+                <TableHeaderColumn dataField='subjectID' hidden={ true }>ID Materia</TableHeaderColumn>
             </BootstrapTable>
         </div>
     );

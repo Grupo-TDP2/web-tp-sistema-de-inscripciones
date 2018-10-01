@@ -6,8 +6,7 @@ import {Glyphicon, Button} from 'react-bootstrap';
 import { ToastContainer } from "react-toastr";
 import "./Toastr.css";
 import API_URI from "../config/GeneralConfig.js";
-
-import StudentJSONResponse from "../config/StudentJSONResponse";
+import teacherAuthToken from "../config/AuthToken.js";
 
 let container;
  
@@ -17,32 +16,7 @@ export default class StudentsTable extends Component {
     super(props);
     
     this.state = {
-        students: [
-          {
-            studentID: '100',
-            name: 'Tobias Bianchi',
-            studentNumber: '93888',
-            status: 'Regular'
-          },
-          {
-            studentID: '101',
-            name: 'Juan Costamagna',
-            studentNumber: '93383',
-            status: 'Regular'
-          },
-          {
-            studentID: '102',
-            name: 'Leandro Masello',
-            studentNumber: '93391',
-            status: 'Regular'
-          },
-          {
-            studentID: '103',
-            name: 'Gonzalo Merino',
-            studentNumber: '93952',
-            status: 'Condicional'
-          }
-        ],
+        students: [],
         loaderMsg: 'Cargando la informacion...',
         redirect: false,
         redirectTo: ''
@@ -54,7 +28,6 @@ export default class StudentsTable extends Component {
   }
 
   async componentDidMount() {
-    this.setState({loaderMsg: 'No hay datos disponibles.'});
     const errorToastr = message => this.displayErrorToastr(message);
     const setLoaderMsg = mLoaderMsg => this.setState({ loaderMsg: mLoaderMsg });
     const setStudents = mStudents => this.setState({students: mStudents});
@@ -62,10 +35,14 @@ export default class StudentsTable extends Component {
     await axios({
       method:'get',
       url: API_URI + '/teachers/me/courses/' + this.props.childProps.courseID + '/enrolments',
-      headers: {'Authorization': 'eyJhbGciOiJIUzI1NiJ9.eyJkYXRhIjp7ImlkIjoyfSwiZXhwIjoxNTQzNTMyMDkyfQ.snEe9NZkCDdKsB9HNJrWAuXg-Q92vnSW4EImXXQIfCE'}
+      headers: {'Authorization': teacherAuthToken}
       })
         .then(function(response) {
           console.log(response);
+
+          if (response.data.length === 0) {
+            setLoaderMsg("No hay datos disponibles.");
+          }
 
           let mStudents = [];
 
