@@ -27,6 +27,13 @@ export default class TeachersModal extends Component {
         }
       ];
 
+      this.positionMappings = {
+        'course_chief': 'Titular',
+        'practice_chief': 'Jefe Trabajos Prácticos',
+        'first_assistant': 'Asistente Primero',
+        'second_assistant': 'Asistente Segundo'
+      }
+
       this.state = {
         show: true,
         availableTeachers: [],
@@ -77,7 +84,8 @@ export default class TeachersModal extends Component {
           id: this.state.newTeacherID,
           first_name: this.state.availableTeachers.find(teacher => teacher.id === this.state.newTeacherID).first_name,
           last_name: this.state.availableTeachers.find(teacher => teacher.id === this.state.newTeacherID).last_name,
-          position: this.state.newTeacherPosition
+          position: this.state.newTeacherPosition,
+          positionMapped: this.positionMappings[this.state.newTeacherPosition]
         });
         this.setState({currentTeachers: mCurrentTeachers});
         this.props.childProps.handleAddTeacher({
