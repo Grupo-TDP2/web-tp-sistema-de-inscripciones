@@ -1,3 +1,3 @@
-const API_URI = "http://0.0.0.0:8000/api/v1";
+const API_URI = "https://api-sistema-de-inscripciones.herokuapp.com/api/v1";
 
 export default API_URI;

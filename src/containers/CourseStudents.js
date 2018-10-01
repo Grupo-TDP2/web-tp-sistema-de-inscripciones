@@ -14,13 +14,14 @@ export default class CourseStudents extends Component {
   render() {
     const childProps = {
       token: this.props.token,
-      handleLogout: this.props.handleLogout
+      handleLogout: this.props.handleLogout,
+      courseID: this.props.match.params.courseID
     };
 
     return (
       this.props.isAuthenticated &&
       <div>
-        <h1>75.12 Análisis Númerico I</h1>
+        <h1>{this.props.match.params.subject}</h1>
         <StudentsTable childProps={childProps}/>
       </div>
     );

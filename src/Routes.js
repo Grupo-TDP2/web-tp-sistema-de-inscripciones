@@ -13,7 +13,7 @@ export default ({ childProps }) =>
     <AppliedRoute path="/" exact component={Home} props={childProps} />
     <AppliedRoute path="/login" exact component={Login} props={childProps} />
     <AppliedRoute path="/teacherCourses" exact component={TeacherCourses} props={childProps} />
-    <AppliedRoute path="/courseStudents" exact component={CourseStudents} props={childProps} />
+    <AppliedRoute path="/courseStudents/:courseID/:subject" exact component={CourseStudents} props={childProps} />
     <AppliedRoute path="/departmentCourses" exact component={DepartmentCourses} props={childProps} />
     { /* Finally, catch all unmatched routes */ }
     <Route component={NotFound} />
