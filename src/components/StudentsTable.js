@@ -10,7 +10,7 @@ import API_URI from "../config/GeneralConfig.js";
 import StudentJSONResponse from "../config/StudentJSONResponse";
 
 let container;
-
+ 
 export default class StudentsTable extends Component {
 
   constructor(props) {
