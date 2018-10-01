@@ -53,7 +53,7 @@ export default class StudentsTable extends Component {
     this.handleClick = this.handleClick.bind(this);
   }
 
-  componentDidMount() {
+  async componentDidMount() {
     this.setState({loaderMsg: 'No hay datos disponibles.'});
     const errorToastr = message => this.displayErrorToastr(message);
     const setLoaderMsg = mLoaderMsg => this.setState({ loaderMsg: mLoaderMsg });
