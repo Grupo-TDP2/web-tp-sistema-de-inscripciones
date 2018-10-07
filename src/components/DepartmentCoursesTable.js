@@ -64,10 +64,6 @@ export default class DepartmentCoursesTable extends Component {
 
     this.loadCourses();
 
-
-    if (this.state.courses.length === 0) {
-      setLoaderMsg("No hay datos disponibles.");
-    }
   }
 
   async loadCourses() {
@@ -83,6 +79,10 @@ export default class DepartmentCoursesTable extends Component {
       })
         .then(function(response) {
           console.log(response);
+
+          if (response.data.length === 0) {
+            setLoaderMsg("No hay datos disponibles.");
+          }
 
           let mCourses = [];
     

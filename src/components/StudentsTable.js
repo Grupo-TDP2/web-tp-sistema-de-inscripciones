@@ -49,7 +49,7 @@ export default class StudentsTable extends Component {
           response.data.forEach(student => {
             let mStudent = {
               studentID: student.id,
-              name: student.student.first_name + ' ' + student.student.last_name,
+              name: student.student.last_name + ', ' + student.student.first_name,
               studentNumber: student.student.school_document_number
             }
 
@@ -135,13 +135,13 @@ export default class StudentsTable extends Component {
       );
     }
 
-    function customSortFunction(a, b, order) {   // order is desc or asc
+    /*function customSortFunction(a, b, order) {   // order is desc or asc
       if (order === 'desc') {
         return a.name.split(' ')[1].localeCompare(b.name.split(' ')[1]);
       } else {
         return b.name.split(' ')[1].localeCompare(a.name.split(' ')[1]);
       }
-    }
+    }*/
 
     return (
       <div>
@@ -152,7 +152,7 @@ export default class StudentsTable extends Component {
         <BootstrapTable ref='coursesTable' data={ this.state.students } options={ options }
                     headerStyle={ { background: '#f8f8f8' } } pagination={ true } search={ true } searchPlaceholder={'Buscar'}>
             <TableHeaderColumn dataField='studentID' hidden={ true } width='80' isKey={ true } headerAlign='center' dataAlign='center'>ID Alumno</TableHeaderColumn>
-            <TableHeaderColumn dataField='name' dataSort sortFunc={ customSortFunction } headerAlign='center' dataAlign='center'>Nombre</TableHeaderColumn>
+            <TableHeaderColumn dataField='name' dataSort={ true } headerAlign='center' dataAlign='center'>Nombre</TableHeaderColumn>
             <TableHeaderColumn dataField='studentNumber' dataSort={ true } width='180' headerAlign='center' dataAlign='center'>Padron</TableHeaderColumn>
             <TableHeaderColumn dataField='status' width='160' headerAlign='center' dataAlign='center'>Condición</TableHeaderColumn>
             <TableHeaderColumn dataField="button" width='140' headerAlign='center' dataAlign='center' dataFormat={buttonFormatter}>Acciones</TableHeaderColumn>

@@ -135,7 +135,7 @@ export default class TeachersModal extends Component {
                     <ControlLabel className="form-label">Nombre</ControlLabel>{' '}
                     <FormControl 
                         componentClass="select" 
-                        placeholder="Seleccione una posición"
+                        placeholder="Seleccione"
                         onChange={this.handleTeacherChange} >
                             {teachersList}
                     </FormControl>
@@ -165,7 +165,7 @@ export default class TeachersModal extends Component {
               </div>
             </Modal.Body>
             <Modal.Footer>
-                <Button onClick={this.props.childProps.handleClose}>Cerrar</Button>
+                <Button onClick={this.props.childProps.handleClose}>OK</Button>
             </Modal.Footer>
           </Modal>
         </div>
