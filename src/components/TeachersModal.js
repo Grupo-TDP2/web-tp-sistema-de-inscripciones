@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import {Modal, Button, Form, FormGroup, ControlLabel, FormControl, Table} from 'react-bootstrap';
+import Select from 'react-select';
 import './TeachersModal.css';
 import API_URI from "../config/GeneralConfig.js";
 import axios from 'axios'
@@ -10,20 +11,20 @@ export default class TeachersModal extends Component {
   
       this.positions = [
         {
-          name: "Titular",
-          mapping: "course_chief"
+          label: "Titular",
+          value: "course_chief"
         },
         {
-          name: "Jefe Trabajos Prácticos",
-          mapping: "practice_chief"
+          label: "Jefe Trabajos Prácticos",
+          value: "practice_chief"
         },
         {
-          name: "Asistente Primero",
-          mapping: "first_assistant"
+          label: "Asistente Primero",
+          value: "first_assistant"
         },
         {
-          name: "Asistente Segundo",
-          mapping: "second_assistant"
+          label: "Asistente Segundo",
+          value: "second_assistant"
         }
       ];
 
@@ -61,7 +62,18 @@ export default class TeachersModal extends Component {
           .then(function(response) {
             console.log(response);
 
-            setAvailableTeachers(response.data);
+            let mAvailableTeachers = [];
+
+            response.data.forEach(teacher => {
+              let mTeacher = {
+                value: teacher.id,
+                label: teacher.first_name + " " + teacher.last_name
+              }
+
+              mAvailableTeachers.push(mTeacher);
+            });
+
+            setAvailableTeachers(mAvailableTeachers);
           })
           .catch(function (error) {
             console.log(error);
@@ -70,28 +82,31 @@ export default class TeachersModal extends Component {
     }
 
     handlePositionChange(e) {
-      this.setState({ newTeacherPosition: e.target.value });
+      this.setState({ newTeacherPosition: e.value });
     }
 
     handleTeacherChange(e) {
-      this.setState({ newTeacherID: parseInt(e.target.value) });
+      this.setState({ newTeacherID: parseInt(e.value) });
     }
 
     handleSubmitNewTeacher() {
       if (this.state.currentTeachers.every(teacher => teacher.id !== this.state.newTeacherID)) {
-        let mCurrentTeachers = this.state.currentTeachers;
-        mCurrentTeachers.push({
-          id: this.state.newTeacherID,
-          first_name: this.state.availableTeachers.find(teacher => teacher.id === this.state.newTeacherID).first_name,
-          last_name: this.state.availableTeachers.find(teacher => teacher.id === this.state.newTeacherID).last_name,
-          position: this.state.newTeacherPosition,
-          positionMapped: this.positionMappings[this.state.newTeacherPosition]
-        });
-        this.setState({currentTeachers: mCurrentTeachers});
-        this.props.childProps.handleAddTeacher({
+        const teacherAddResponse = this.props.childProps.handleAddTeacher({
           id: this.state.newTeacherID,
           position: this.state.newTeacherPosition
         }, this.props.childProps.courseInfo.id, this.props.childProps.courseInfo.subjectID);
+        
+        if (teacherAddResponse === true) {
+          let mCurrentTeachers = this.state.currentTeachers;
+          mCurrentTeachers.push({
+            id: this.state.newTeacherID,
+            first_name: this.state.availableTeachers.find(teacher => teacher.value === this.state.newTeacherID).label.split(" ")[0],
+            last_name: this.state.availableTeachers.find(teacher => teacher.value === this.state.newTeacherID).label.split(" ")[1],
+            position: this.state.newTeacherPosition,
+            positionMapped: this.positionMappings[this.state.newTeacherPosition]
+          });
+          this.setState({currentTeachers: mCurrentTeachers});
+        }
       } else {
         this.props.childProps.displayErrorToastr("El docente ya esta asociado con este curso.");
       }
@@ -101,13 +116,13 @@ export default class TeachersModal extends Component {
     render() {
       var positionsList = this.positions.map(function(position) {
           return (
-              <option key={position.name} value={position.mapping}>{position.name}</option>
+              <option key={position.label} value={position.value}>{position.label}</option>
           );
       });
 
       var teachersList = this.state.availableTeachers.map(function(teacher) {
           return (
-              <option key={teacher.id} value={teacher.id}>{teacher.first_name + " " + teacher.last_name}</option>
+              <option key={teacher.value} value={teacher.value}>{teacher.label}</option>
           );
       });
 
@@ -130,27 +145,29 @@ export default class TeachersModal extends Component {
             </Modal.Header>
             <Modal.Body>
               <div className="teachers-modal-main-flex">
-                <Form className="teachers-modal-main-item" inline>
-                  <FormGroup className="item-margin" controlId="formInlineName">
-                    <ControlLabel className="form-label">Nombre</ControlLabel>{' '}
-                    <FormControl 
-                        componentClass="select" 
-                        placeholder="Seleccione"
-                        onChange={this.handleTeacherChange} >
-                            {teachersList}
-                    </FormControl>
-                  </FormGroup>{' '}
-                  <FormGroup className="item-margin" controlId="formInlinePosition">
-                    <ControlLabel className="form-label">Posición</ControlLabel>{' '}
-                    <FormControl 
-                        componentClass="select" 
-                        placeholder="Seleccione una posición"
-                        onChange={this.handlePositionChange} >
-                            {positionsList}
-                    </FormControl>
-                  </FormGroup>{' '}
-                  <Button className="item-margin" onClick={this.handleSubmitNewTeacher}>Asociar</Button>
-                </Form>
+                <div className="teachers-modal-main-item sub-flex">
+                  <p className="sub-flex-item">Nombre</p>
+                  <Select
+                    className="basic-single modal-select sub-flex-item"
+                    classNamePrefix="select"
+                    placeholder="Seleccione..."
+                    onChange={this.handleTeacherChange}
+                    defaultValue={this.state.availableTeachers[0]}
+                    isSearchable={true}
+                    name="name"
+                    options={this.state.availableTeachers}
+                  />
+                  <p className="sub-flex-item">Posición</p>
+                  <Select
+                    className="basic-single modal-select sub-flex-item"
+                    classNamePrefix="select"
+                    onChange={this.handlePositionChange}
+                    defaultValue={this.positions[0]}
+                    name="position"
+                    options={this.positions}
+                  />
+                  <Button className="sub-flex-item" onClick={this.handleSubmitNewTeacher}>Asociar</Button>
+                </div>
                 <Table className="teachers-modal-main-item current-teachers-list" striped bordered condensed>
                   <thead>
                     <tr>

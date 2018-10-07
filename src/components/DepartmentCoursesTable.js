@@ -109,6 +109,29 @@ export default class DepartmentCoursesTable extends Component {
 
               mCourse.teachers = mTeachers;
 
+              if (course.lesson_schedules.length > 0) {
+                let mSchedule = '';
+                let mLocation = '';
+                let mClassroom = '';
+                
+                course.lesson_schedules.forEach(lessonSchedule => {
+                  let mStartHour = lessonSchedule.hour_start.split('T')[1].substr(0,5);
+                  let mEndHour = lessonSchedule.hour_end.split('T')[1].substr(0,5);
+  
+                  mSchedule = mSchedule + lessonSchedule.day + ' ' + mStartHour + ' - ' + mEndHour;
+                  mLocation = mLocation + lessonSchedule.classroom.building.name + '\n';
+                  mClassroom = mClassroom + lessonSchedule.classroom.floor + lessonSchedule.classroom.number + '\n';
+  
+                  mSchedule = mSchedule + '\n';
+                });
+  
+                mCourse.schedule = mSchedule;
+                mCourse.location = mLocation;
+                mCourse.classroom = mClassroom;
+              } else {
+                mCourse.schedule = '';
+              }
+
               mCourses.push(mCourse);
             })
           });
@@ -262,6 +285,8 @@ export default class DepartmentCoursesTable extends Component {
       teaching_position: teacher.position
     };
 
+    let response = true;
+
     await axios({
       method:'post',
       data: {
@@ -275,8 +300,11 @@ export default class DepartmentCoursesTable extends Component {
         })
         .catch(function (error) {
           console.log(error);
-          errorToastr("No se pudieron cargar los datos.");
+          response = false;
+          errorToastr("No se pudo asociar al docente.");
         });
+
+    return response;
   }
 
   handleTeachersModalClose() {

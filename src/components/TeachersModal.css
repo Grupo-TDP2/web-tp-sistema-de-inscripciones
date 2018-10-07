@@ -7,10 +7,23 @@
     align-self: center;
 }
 
-.item-margin {
-    margin-left: 10px;
+.sub-flex {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    width: 100%;
 }
 
 .current-teachers-list {
     margin-top: 15px;
+}
+
+.modal-select {
+    width: 170px;
+}
+
+.sub-flex-item {
+    align-self: center;
+    margin-top: auto;
+    margin-bottom: auto;
 }
