@@ -46,14 +46,10 @@ export default class DepartmentCoursesTable extends Component {
     this.addNewCourse = this.addNewCourse.bind(this);
     this.handleTeacherDeleteClick = this.handleTeacherDeleteClick.bind(this);
     this.handleAddTeacher = this.handleAddTeacher.bind(this);
-    this.loadCoursesForTeacher = this.loadCoursesForTeacher.bind(this);
     this.loadCourses = this.loadCourses.bind(this);
   }
 
   async componentDidMount() {
-    this.setState({loaderMsg: 'No hay datos disponibles.'});
-    const setLoaderMsg = mLoaderMsg => this.setState({ loaderMsg: mLoaderMsg });
-    
     //ARGERICH
     //const authTokenArgerich = 'eyJhbGciOiJIUzI1NiJ9.eyJkYXRhIjp7ImlkIjo1fSwiZXhwIjoxNTQzNjA1ODg0fQ.vYf2ZbJumUyTNcEtL-b5A2dWS03i6RYRL-EZWZ7VmOs';
     //FONTELA
@@ -75,7 +71,7 @@ export default class DepartmentCoursesTable extends Component {
     await axios({
       method:'get',
       url: API_URI + '/departments/me/courses',
-      headers: {'Authorization': 'eyJhbGciOiJIUzI1NiJ9.eyJkYXRhIjp7ImlkIjoyfSwiZXhwIjoxNTQzNjA1NjI2fQ.BJBTtcwN6-s_vT3zVz_NFBykRr8ZhrtkRSRAn_2bNmo'}
+      headers: {'Authorization': this.props.childProps.token}
       })
         .then(function(response) {
           console.log(response);
@@ -145,73 +141,6 @@ export default class DepartmentCoursesTable extends Component {
         });
   }
 
-  async loadCoursesForTeacher(authToken) {
-    const errorToastr = message => this.displayErrorToastr(message);
-    const setLoaderMsg = mLoaderMsg => this.setState({ loaderMsg: mLoaderMsg });
-    const setCourses = mCourses => {
-      let updatedCourses = this.state.courses;
-      mCourses.forEach(course => {
-        if (this.state.courses.every(currentCourse => currentCourse.id !== course.id)) {
-          updatedCourses.push(course);
-        }  
-      });
-      this.setState({ courses: updatedCourses });
-    };
-
-    await axios({
-      method:'get',
-      url: API_URI + '/teachers/me/courses',
-      headers: {'Authorization': authToken}
-      })
-        .then(function(response) {
-          console.log(response);
-
-          let mCourses = [];
-    
-          response.data.forEach(course => {
-            let mCourse = {
-              id: course.id,
-              courseID: course.name,
-              subject: course.subject.name,
-              teachers: course.teachers,
-              subjectID: course.subject.id
-            }
-
-            if (course.lesson_schedules.length > 0) {
-              let mSchedule = '';
-              let mLocation = '';
-              let mClassroom = '';
-              
-              course.lesson_schedules.forEach(lessonSchedule => {
-                let mStartHour = lessonSchedule.hour_start.split('T')[1].substr(0,5);
-                let mEndHour = lessonSchedule.hour_end.split('T')[1].substr(0,5);
-
-                mSchedule = mSchedule + lessonSchedule.day + ' ' + mStartHour + ' - ' + mEndHour;
-                mLocation = mLocation + lessonSchedule.classroom.building.name + '\n';
-                mClassroom = mClassroom + lessonSchedule.classroom.floor + lessonSchedule.classroom.number + '\n';
-
-                mSchedule = mSchedule + '\n';
-              });
-
-              mCourse.schedule = mSchedule;
-              mCourse.location = mLocation;
-              mCourse.classroom = mClassroom;
-            } else {
-              mCourse.schedule = '';
-            }
-            
-            mCourses.push(mCourse);
-          });
-
-          setCourses(mCourses);
-        })
-        .catch(function (error) {
-          console.log(error);
-          errorToastr("No se pudieron cargar los datos.");
-          setLoaderMsg("No se pudieron cargar los datos.");
-        });
-  }
-
   displayErrorToastr(message) {
     container.error(<div></div>, <em>{message}</em>, 
         {closeButton: true, timeOut: 3000}
@@ -248,7 +177,8 @@ export default class DepartmentCoursesTable extends Component {
         courseModalProps: {
             mode: 'new',
             handleClose: this.handleCourseModalClose,
-            addNewCourse: this.addNewCourse
+            addNewCourse: this.addNewCourse,
+            token: this.props.childProps.token
         } 
     });*/
     this.displayErrorToastr("Funcionalidad habilitada proximamente.");
@@ -269,16 +199,14 @@ export default class DepartmentCoursesTable extends Component {
             handleAddTeacher: this.handleAddTeacher,
             teachers: row.teachers,
             displayErrorToastr: this.displayErrorToastr,
-            courseInfo: row
+            courseInfo: row,
+            token: this.props.childProps.token
         } 
     });
   }
 
   async handleAddTeacher(teacher, courseID, subjectID) {
     const errorToastr = message => this.displayErrorToastr(message);
-
-    //DEPTO INFORMATICA
-    const staffToken = 'eyJhbGciOiJIUzI1NiJ9.eyJkYXRhIjp7ImlkIjoyfSwiZXhwIjoxNTQzNjA1NjI2fQ.BJBTtcwN6-s_vT3zVz_NFBykRr8ZhrtkRSRAn_2bNmo';
 
     const teacherCourse = {
       teacher_id: teacher.id,
@@ -293,7 +221,7 @@ export default class DepartmentCoursesTable extends Component {
           teacher_course: teacherCourse
       },
       url: API_URI + "/departments/me/subjects/" + subjectID + "/courses/" + courseID + "/teachers",
-      headers: {'Authorization': staffToken}
+      headers: {'Authorization': this.props.childProps.token}
       })
         .then(function(response) {
           console.log(response);
@@ -301,7 +229,12 @@ export default class DepartmentCoursesTable extends Component {
         .catch(function (error) {
           console.log(error);
           response = false;
-          errorToastr("No se pudo asociar al docente.");
+          if (error.toString().includes("422")) {
+            errorToastr("El docente ya se encuentra asociado con otro curso de esta materia.");  
+          } else {
+            errorToastr("No se pudo asociar al docente. Intente nuevamente.");
+          }
+          
         });
 
     return response;
@@ -336,7 +269,7 @@ export default class DepartmentCoursesTable extends Component {
 
     const handleEditClick = (cell,row) => this.handleEditClick(cell,row);
     const handleDeleteClick = (cell,row) => this.handleDeleteClick(cell,row);
-    const handleTeacherDeleteClick = (row, teacherName) => this.handleTeacherDeleteClick(row, teacherName);
+    //const handleTeacherDeleteClick = (row, teacherName) => this.handleTeacherDeleteClick(row, teacherName);
     const handleTeachersMoreInfoClick = (row) => this.handleTeachersMoreInfoClick(row);
 
     const options = {

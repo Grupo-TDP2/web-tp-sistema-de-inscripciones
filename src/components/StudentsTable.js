@@ -35,7 +35,7 @@ export default class StudentsTable extends Component {
     await axios({
       method:'get',
       url: API_URI + '/teachers/me/courses/' + this.props.childProps.courseID + '/enrolments',
-      headers: {'Authorization': teacherAuthToken}
+      headers: {'Authorization': this.props.childProps.token}
       })
         .then(function(response) {
           console.log(response);

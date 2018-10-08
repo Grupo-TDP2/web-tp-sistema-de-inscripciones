@@ -7,7 +7,6 @@ import { ToastContainer } from "react-toastr";
 import "./Toastr.css";
 import "./CoursesTable.css";
 import API_URI from "../config/GeneralConfig.js";
-import teacherAuthToken from "../config/AuthToken.js";
 
 let container;
 
@@ -36,7 +35,7 @@ export default class CoursesTable extends Component {
     await axios({
       method:'get',
       url: API_URI + '/teachers/me/courses',
-      headers: {'Authorization': teacherAuthToken}
+      headers: {'Authorization': this.props.childProps.token}
       })
         .then(function(response) {
           console.log(response);

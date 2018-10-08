@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import {Modal, Button, Form, FormGroup, ControlLabel, FormControl, Table} from 'react-bootstrap';
+import {Modal, Button, Table} from 'react-bootstrap';
 import Select from 'react-select';
 import './TeachersModal.css';
 import API_URI from "../config/GeneralConfig.js";
@@ -58,6 +58,7 @@ export default class TeachersModal extends Component {
       await axios({
         method:'get',
         url: API_URI + "/teachers",
+        headers: {'Authorization': this.props.childProps.token}
         })
           .then(function(response) {
             console.log(response);
@@ -86,7 +87,7 @@ export default class TeachersModal extends Component {
     }
 
     handleTeacherChange(e) {
-      this.setState({ newTeacherID: parseInt(e.value) });
+      this.setState({ newTeacherID: parseInt(e.value, 10) });
     }
 
     handleSubmitNewTeacher() {
@@ -114,17 +115,6 @@ export default class TeachersModal extends Component {
 
   
     render() {
-      var positionsList = this.positions.map(function(position) {
-          return (
-              <option key={position.label} value={position.value}>{position.label}</option>
-          );
-      });
-
-      var teachersList = this.state.availableTeachers.map(function(teacher) {
-          return (
-              <option key={teacher.value} value={teacher.value}>{teacher.label}</option>
-          );
-      });
 
       var currentTeachersList = this.state.currentTeachers.map(function(teacher) {
           return (
