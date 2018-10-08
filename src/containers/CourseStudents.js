@@ -10,7 +10,7 @@ export default class CourseStudents extends Component {
       this.props.history.push("/login") 
     }
   }
-
+ 
   render() {
     const childProps = {
       token: this.props.token,
