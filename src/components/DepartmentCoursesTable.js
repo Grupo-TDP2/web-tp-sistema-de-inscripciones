@@ -172,7 +172,7 @@ export default class DepartmentCoursesTable extends Component {
   }
 
   handleNewCourseClick() {
-    /*this.setState({ 
+    this.setState({ 
         showCourseModal: true,
         courseModalProps: {
             mode: 'new',
@@ -180,8 +180,7 @@ export default class DepartmentCoursesTable extends Component {
             addNewCourse: this.addNewCourse,
             token: this.props.childProps.token
         } 
-    });*/
-    this.displayErrorToastr("Funcionalidad habilitada proximamente.");
+    });
   }
 
   handleCourseModalClose() {

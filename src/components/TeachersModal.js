@@ -142,7 +142,7 @@ export default class TeachersModal extends Component {
                     classNamePrefix="select"
                     placeholder="Seleccione..."
                     onChange={this.handleTeacherChange}
-                    defaultValue={this.state.availableTeachers[0]}
+                    defaultValue={""}
                     isSearchable={true}
                     name="name"
                     options={this.state.availableTeachers}
@@ -151,8 +151,9 @@ export default class TeachersModal extends Component {
                   <Select
                     className="basic-single modal-select sub-flex-item"
                     classNamePrefix="select"
+                    placeholder="Seleccione..."
                     onChange={this.handlePositionChange}
-                    defaultValue={this.positions[0]}
+                    defaultValue={""}
                     name="position"
                     options={this.positions}
                   />
