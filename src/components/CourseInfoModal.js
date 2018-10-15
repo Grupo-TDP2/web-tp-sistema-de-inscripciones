@@ -8,6 +8,32 @@ export default class CourseInfoModal extends Component {
     constructor(props, context) {
       super(props, context);
   
+      this.positions = [
+        {
+          label: "Titular",
+          value: "course_chief"
+        },
+        {
+          label: "Jefe Trabajos Prácticos",
+          value: "practice_chief"
+        },
+        {
+          label: "Asistente Primero",
+          value: "first_assistant"
+        },
+        {
+          label: "Asistente Segundo",
+          value: "second_assistant"
+        }
+      ];
+
+      this.positionMappings = {
+        'course_chief': 'Titular',
+        'practice_chief': 'Jefe Trabajos Prácticos',
+        'first_assistant': 'Asistente Primero',
+        'second_assistant': 'Asistente Segundo'
+      }
+
       this.daysList = [
         { label: "Lunes", value: "Monday", order: 1 },
         { label: "Martes", value: "Tuesday", order: 2 },
@@ -45,7 +71,20 @@ export default class CourseInfoModal extends Component {
         schedules: [],
         day: "",
         startHour: "",
-        endHour: ""
+        endHour: "",
+        teacherList: [
+            {
+                value: "1",
+                label: "Carlos Fontela"
+            },
+            {
+                value: "2",
+                label: "Luis Argerich"
+            }
+        ],
+        currentTeachers: [],
+        addTeacherPosition: "",
+        addTeacherID: ""
       };
 
       this.handleSubjectChange = this.handleSubjectChange.bind(this);
@@ -55,6 +94,9 @@ export default class CourseInfoModal extends Component {
       this.handleStartHourChange = this.handleStartHourChange.bind(this);
       this.handleEndHourChange = this.handleEndHourChange.bind(this);
       this.handleAddSchedule = this.handleAddSchedule.bind(this);
+      this.handleTeacherChange = this.handleTeacherChange.bind(this);
+      this.handlePositionChange = this.handlePositionChange.bind(this);
+      this.handleSubmitNewTeacher = this.handleSubmitNewTeacher.bind(this);
     }
   
     handleSubjectChange(e) {
@@ -86,6 +128,30 @@ export default class CourseInfoModal extends Component {
         mSchedules.push({day: this.state.day, startHour: this.state.startHour, endHour: this.state.endHour});
         mSchedules.sort((a,b) => this.daysList.find((day) => day.value === a.day).order - this.daysList.find((day) => day.value === b.day).order);
         this.setState({ schedules: mSchedules });
+    }
+
+    handleTeacherChange(e) {
+        this.setState({ addTeacherID: e.value });
+    }
+
+    handlePositionChange(e) {
+        this.setState({ addTeacherPosition: e.value });
+    }
+
+    handleSubmitNewTeacher() {
+        if (this.state.currentTeachers.every(teacher => teacher.id !== this.state.addTeacherID)) {
+            let mCurrentTeachers = this.state.currentTeachers;
+            mCurrentTeachers.push({
+                id: this.state.addTeacherID,
+                first_name: this.state.teacherList.find(teacher => teacher.value === this.state.addTeacherID).label.split(" ")[0],
+                last_name: this.state.teacherList.find(teacher => teacher.value === this.state.addTeacherID).label.split(" ")[1],
+                position: this.state.addTeacherPosition,
+                positionMapped: this.positionMappings[this.state.addTeacherPosition]
+            });
+            this.setState({currentTeachers: mCurrentTeachers});
+          } else {
+            this.props.childProps.displayErrorToastr("El docente ya esta asociado con este curso.");
+          }
     }
 
     render() {
@@ -139,6 +205,15 @@ export default class CourseInfoModal extends Component {
               <li key={schedule.day + " " + schedule.startHour + " - " + schedule.endHour}>
                 {days.find((day) => day.value === schedule.day).label + " " + schedule.startHour + " - " + schedule.endHour}
               </li>
+            );
+        });
+
+        var currentTeachersList = this.state.currentTeachers.map(function(teacher) {
+            return (
+              <tr key={teacher.id}>
+                <td>{teacher.first_name + " " + teacher.last_name}</td>
+                <td>{teacher.positionMapped}</td>
+              </tr>
             );
         });
 
@@ -254,7 +329,7 @@ export default class CourseInfoModal extends Component {
                                 defaultValue={""}
                                 isSearchable={true}
                                 name="name"
-                                options={this.state.availableTeachers}
+                                options={this.state.teacherList}
                             />
                             <Select
                                 className="basic-single modal-select sub-flex-item selectMargin"
@@ -275,7 +350,7 @@ export default class CourseInfoModal extends Component {
                                 </tr>
                             </thead>
                             <tbody>
-
+                                {currentTeachersList}
                             </tbody>
                         </Table>
                     </Col>

@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import { Redirect } from 'react-router-dom';
 import {BootstrapTable, TableHeaderColumn} from 'react-bootstrap-table';
 import axios from 'axios'
-import {Glyphicon, Button} from 'react-bootstrap';
+import {Glyphicon, Button, ToggleButton, ToggleButtonGroup} from 'react-bootstrap';
 import { ToastContainer } from "react-toastr";
 import "./Toastr.css";
 import "./CoursesTable.css";
@@ -19,12 +19,16 @@ export default class CoursesTable extends Component {
         courses: [],
         loaderMsg: 'Cargando la informacion...',
         redirect: false,
-        redirectTo: ''
+        redirectTo: '',
+        radioValue: 2
     };
 
     this.customTitle = this.customTitle.bind(this);
     this.displayErrorToastr = this.displayErrorToastr.bind(this);
-    this.handleClick = this.handleClick.bind(this);
+    this.displaySuccessToastr = this.displaySuccessToastr.bind(this);
+    this.handleStudentsClick = this.handleStudentsClick.bind(this);
+    this.handleExamsClick = this.handleExamsClick.bind(this);
+    this.handleAcceptFreeClick = this.handleAcceptFreeClick.bind(this);
   }
 
   async componentDidMount() {
@@ -51,6 +55,12 @@ export default class CoursesTable extends Component {
               id: course.id,
               courseID: course.name,
               subject: course.subject.name
+            }
+
+            if (course.accept_free_condition_exam === true) {
+              mCourse.acceptFree = 1
+            } else {
+              mCourse.acceptFree = 2
             }
 
             if (course.lesson_schedules.length > 0) {
@@ -86,39 +96,6 @@ export default class CoursesTable extends Component {
           errorToastr("No se pudieron cargar los datos.");
           setLoaderMsg("No se pudieron cargar los datos.");
         });
-
-    /*let mCourses = [];
-    
-    JSONResponse.data.forEach(course => {
-      let mCourse = {
-        id: course.id,
-        courseID: course.name,
-        subject: course.subject.name,
-        location: '',
-        classroom: ''
-      }
-
-      if (course.lesson_schedules.length > 0) {
-        let mSchedule = '';
-        
-        course.lesson_schedules.forEach(lessonSchedule => {
-          let mStartHour = lessonSchedule.hour_start.split('T')[1].substr(0,5);
-          let mEndHour = lessonSchedule.hour_end.split('T')[1].substr(0,5);
-
-          mSchedule = mSchedule + lessonSchedule.day + ' ' + mStartHour + ' - ' + mEndHour;
-
-          mSchedule = mSchedule + '\n';
-        });
-
-        mCourse.schedule = mSchedule;
-      } else {
-        mCourse.schedule = '';
-      }
-      
-      mCourses.push(mCourse);
-    });
-
-    this.setState({ courses: mCourses });*/
   }
 
   displayErrorToastr(message) {
@@ -127,15 +104,69 @@ export default class CoursesTable extends Component {
       );
   }
 
+  displaySuccessToastr(message) {
+    container.success(<div></div>, <em>{message}</em>, 
+        {closeButton: true, timeOut: 3000}
+      );
+  }
+
   customTitle(cell, row, rowIndex, colIndex) {
     return `Doble click para editar`;
   }
 
-  handleClick(cell, row) {
+  handleStudentsClick(cell, row) {
     this.setState({
       redirect: true,
       redirectTo: '/courseStudents/' + row.id + '/' + row.subject
     });
+  }
+
+  handleExamsClick(cell, row) {
+    this.setState({
+      redirect: true,
+      redirectTo: '/courseExams/' + row.id + '/' + row.subject
+    });
+  }
+
+  async handleAcceptFreeClick(e, row) {
+    /*const errorToastr = message => this.displayErrorToastr(message);
+    const successToastr = message => this.displaySuccessToastr(message);
+
+    let mAcceptFree;
+
+    if (e === 1) {
+      mAcceptFree = true;
+    } else {
+      mAcceptFree = false;
+    }
+
+    await axios({
+      method:'patch',
+      data: {
+        course: {
+          accept_free_condition_exam: mAcceptFree
+        }
+      },
+      url: API_URI + '/teachers/me/courses/' + row.id,
+      headers: {'Authorization': this.props.childProps.token}
+      })
+        .then(function(response) {
+          console.log(response);
+          successToastr("La operación se realizo con exito.");
+        })
+        .catch(function (error) {
+          console.log(error);
+          errorToastr("No se pudo realizar la operación. Intente nuevamente.");
+        });
+        */
+       //console.log(row);
+       //console.log(e);
+       //console.log(this.state.courses);
+    /*let mCourses = this.state.courses;
+    const courseIndex = mCourses.findIndex((course) => course.id === row.id);
+    mCourses[courseIndex].acceptFree = e;
+    this.setState({ courses: mCourses });*/
+    this.setState({ radioValue: e});
   }
 
   render() {
@@ -143,7 +174,10 @@ export default class CoursesTable extends Component {
       return <Redirect push to={`${this.state.redirectTo}`} />;
     }
 
-    const handleClick = (cell,row) => this.handleClick(cell,row);
+    const handleStudentsClick = (cell,row) => this.handleStudentsClick(cell,row);
+    const handleExamsClick = (cell,row) => this.handleExamsClick(cell,row);
+    const handleAcceptFreeClick = (cell,row) => this.handleAcceptFreeClick(cell,row);
+    const mRadioValue = this.state.radioValue;
 
     const options = {
         noDataText: this.state.loaderMsg,
@@ -160,11 +194,34 @@ export default class CoursesTable extends Component {
         sizePerPage: 10
     };
 
-    function buttonFormatter(cell, row){
+    function studentsButtonFormatter(cell, row){
       return (
-        <Button className="submitButton" onClick={() => handleClick(cell,row)}>
+        <Button className="submitButton" onClick={() => handleStudentsClick(cell,row)}>
             <Glyphicon glyph="education" />&nbsp;
         </Button>
+      );
+    }
+
+    function examsButtonFormatter(cell, row){
+      return (
+        <Button className="submitButton" onClick={() => handleExamsClick(cell,row)}>
+            <Glyphicon glyph="calendar" />&nbsp;
+        </Button>
+      );
+    }
+
+    function freeCheckboxFormatter(cell, row){
+      console.log(row);
+      return (
+        <ToggleButtonGroup 
+          type="radio" 
+          name="options" 
+          defaultValue={1}
+          value={mRadioValue}
+          onChange={(e) => handleAcceptFreeClick(e,row)}>
+            <ToggleButton value={1}>Si</ToggleButton>
+            <ToggleButton value={2}>No</ToggleButton>
+        </ToggleButtonGroup>
       );
     }
 
@@ -182,7 +239,10 @@ export default class CoursesTable extends Component {
             <TableHeaderColumn dataField='schedule' width='180' headerAlign='center' dataAlign='center' tdStyle={ { whiteSpace: 'normal' } }>Horario</TableHeaderColumn>
             <TableHeaderColumn dataField='location' width='55' headerAlign='center' dataAlign='center' tdStyle={ { whiteSpace: 'normal' } }>Sede</TableHeaderColumn>
             <TableHeaderColumn dataField='classroom' width='60' headerAlign='center' dataAlign='center' tdStyle={ { whiteSpace: 'normal' } }>Aula</TableHeaderColumn>
-            <TableHeaderColumn dataField="button" width='100' headerAlign='center' dataAlign='center' dataFormat={buttonFormatter}>Alumnos</TableHeaderColumn>
+            <TableHeaderColumn dataField="students" width='100' headerAlign='center' dataAlign='center' dataFormat={studentsButtonFormatter}>Alumnos</TableHeaderColumn>
+            <TableHeaderColumn dataField="exams" width='100' headerAlign='center' dataAlign='center' dataFormat={examsButtonFormatter}>Exámenes</TableHeaderColumn>
+            <TableHeaderColumn dataField="exams" width='100' headerAlign='center' dataAlign='center' dataFormat={freeCheckboxFormatter}>Libres</TableHeaderColumn>
+            <TableHeaderColumn dataField="acceptFree" hidden={ true }>Acepta Libres</TableHeaderColumn>
         </BootstrapTable>
       </div>
     );

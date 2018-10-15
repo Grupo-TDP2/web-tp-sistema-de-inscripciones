@@ -178,6 +178,7 @@ export default class DepartmentCoursesTable extends Component {
             mode: 'new',
             handleClose: this.handleCourseModalClose,
             addNewCourse: this.addNewCourse,
+            displayErrorToastr: this.displayErrorToastr,
             token: this.props.childProps.token
         } 
     });
@@ -331,7 +332,7 @@ export default class DepartmentCoursesTable extends Component {
         <div className="teacher-flex-aux">
           <div className="teacher-flex-aux-item">{teacherNames}</div>
           <Button className="teacher-flex-aux-item teacher-more-btn" onClick={() => handleTeachersMoreInfoClick(row)}>
-              <Glyphicon glyph="user" /> Ver
+              <Glyphicon glyph="user" />
           </Button>
         </div>
       );
