@@ -124,7 +124,6 @@ export default class StudentsTable extends Component {
     }
 
     const handleDeleteClick = (cell,row) => this.handleDeleteClick(cell,row);
-    const handleGoBack = (cell,row) => this.handleGoBack(cell,row);
 
     const options = {
         noDataText: this.state.loaderMsg,

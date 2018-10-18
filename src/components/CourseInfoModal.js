@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import {Modal, Button, Form, FormGroup, ControlLabel, FormControl, Glyphicon, Table, Row, Col} from 'react-bootstrap';
+import {Modal, Button, Glyphicon, Table, Row, Col} from 'react-bootstrap';
 import './CourseInfoModal.css';
 import './TeachersModal.css';
 import Select from 'react-select';
@@ -24,6 +24,10 @@ export default class CourseInfoModal extends Component {
         {
           label: "Asistente Segundo",
           value: "second_assistant"
+        },
+        {
+            label: "Ayudante Ad-Honorem",
+            value: "ad_honorem"
         }
       ];
 
@@ -31,7 +35,8 @@ export default class CourseInfoModal extends Component {
         'course_chief': 'Titular',
         'practice_chief': 'Jefe Trabajos Prácticos',
         'first_assistant': 'Asistente Primero',
-        'second_assistant': 'Asistente Segundo'
+        'second_assistant': 'Asistente Segundo',
+        'ad_honorem': 'Ayudante Ad-Honorem'
       }
 
       this.daysList = [
@@ -219,11 +224,19 @@ export default class CourseInfoModal extends Component {
 
         const filteredStartHoursList = hoursList.filter((hour) => {
             if (hour.day.includes(this.state.day) && 
-            Date.parse('01/01/2011 ' + hour.value + ":00") < Date.parse('01/01/2011 20:30:00')) return true;
+            Date.parse('01/01/2011 ' + hour.value + ":00") < Date.parse('01/01/2011 20:30:00')) {
+                return true;
+            } else {
+                return false;
+            }
         });
         const filteredEndHoursList = hoursList.filter((hour) => {
             if (Date.parse('01/01/2011 ' + hour.value + ":00") > Date.parse('01/01/2011 ' + this.state.startHour + ":00") &&
-                parseInt(hour.value.split(":")[0] ,10) < parseInt(this.state.startHour.split(":")[0], 10) + 4) return true;
+                parseInt(hour.value.split(":")[0] ,10) < parseInt(this.state.startHour.split(":")[0], 10) + 4) {
+                    return true;
+                } else {
+                    return false;
+                }
         });
 
         return (

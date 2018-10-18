@@ -25,6 +25,10 @@ export default class TeachersModal extends Component {
         {
           label: "Asistente Segundo",
           value: "second_assistant"
+        },
+        {
+          label: "Ayudante Ad-Honorem",
+          value: "ad_honorem"
         }
       ];
 
@@ -32,7 +36,8 @@ export default class TeachersModal extends Component {
         'course_chief': 'Titular',
         'practice_chief': 'Jefe Trabajos Prácticos',
         'first_assistant': 'Asistente Primero',
-        'second_assistant': 'Asistente Segundo'
+        'second_assistant': 'Asistente Segundo',
+        'ad_honorem': 'Ayudante Ad-Honorem'
       }
 
       this.state = {

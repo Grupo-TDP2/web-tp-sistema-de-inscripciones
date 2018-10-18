@@ -20,7 +20,7 @@ export default class CoursesTable extends Component {
         loaderMsg: 'Cargando la informacion...',
         redirect: false,
         redirectTo: '',
-        radioValue: 2
+        toggles: []
     };
 
     this.customTitle = this.customTitle.bind(this);
@@ -58,9 +58,9 @@ export default class CoursesTable extends Component {
             }
 
             if (course.accept_free_condition_exam === true) {
-              mCourse.acceptFree = 1
+              mCourse.acceptFree = 1;
             } else {
-              mCourse.acceptFree = 2
+              mCourse.acceptFree = 2;
             }
 
             if (course.lesson_schedules.length > 0) {
@@ -129,8 +129,10 @@ export default class CoursesTable extends Component {
   }
 
   async handleAcceptFreeClick(e, row) {
-    /*const errorToastr = message => this.displayErrorToastr(message);
+    const errorToastr = message => this.displayErrorToastr(message);
     const successToastr = message => this.displaySuccessToastr(message);
+    const getCourses = () => this.state.courses;
+    const setCourses = mCourses => this.setState({ courses: mCourses });
 
     let mAcceptFree;
 
@@ -152,21 +154,18 @@ export default class CoursesTable extends Component {
       })
         .then(function(response) {
           console.log(response);
+
+          let mCourses = getCourses();
+          const courseIndex = mCourses.findIndex((course) => course.id === row.id);
+          mCourses[courseIndex].acceptFree = e;
+          setCourses(mCourses);
+
           successToastr("La operación se realizo con exito.");
         })
         .catch(function (error) {
           console.log(error);
           errorToastr("No se pudo realizar la operación. Intente nuevamente.");
         });
-        */
-       //console.log(row);
-       //console.log(e);
-       //console.log(this.state.courses);
-    /*let mCourses = this.state.courses;
-    const courseIndex = mCourses.findIndex((course) => course.id === row.id);
-    mCourses[courseIndex].acceptFree = e;
-    this.setState({ courses: mCourses });*/
-    this.setState({ radioValue: e});
   }
 
   render() {
@@ -177,7 +176,6 @@ export default class CoursesTable extends Component {
     const handleStudentsClick = (cell,row) => this.handleStudentsClick(cell,row);
     const handleExamsClick = (cell,row) => this.handleExamsClick(cell,row);
     const handleAcceptFreeClick = (cell,row) => this.handleAcceptFreeClick(cell,row);
-    const mRadioValue = this.state.radioValue;
 
     const options = {
         noDataText: this.state.loaderMsg,
@@ -191,7 +189,9 @@ export default class CoursesTable extends Component {
         }, {
           text: 'Todos', value: this.state.courses.length
         } ], // you can change the dropdown list for size per page
-        sizePerPage: 10
+        sizePerPage: 10,
+        defaultSortName: 'id',  // default sort column name
+        defaultSortOrder: 'asc'  // default sort order
     };
 
     function studentsButtonFormatter(cell, row){
@@ -211,17 +211,8 @@ export default class CoursesTable extends Component {
     }
 
     function freeCheckboxFormatter(cell, row){
-      console.log(row);
       return (
-        <ToggleButtonGroup 
-          type="radio" 
-          name="options" 
-          defaultValue={1}
-          value={mRadioValue}
-          onChange={(e) => handleAcceptFreeClick(e,row)}>
-            <ToggleButton value={1}>Si</ToggleButton>
-            <ToggleButton value={2}>No</ToggleButton>
-        </ToggleButtonGroup>
+        <AcceptFreeToggle acceptFree={ cell } handleChange={handleAcceptFreeClick} row={ row } />
       );
     }
 
@@ -241,10 +232,24 @@ export default class CoursesTable extends Component {
             <TableHeaderColumn dataField='classroom' width='60' headerAlign='center' dataAlign='center' tdStyle={ { whiteSpace: 'normal' } }>Aula</TableHeaderColumn>
             <TableHeaderColumn dataField="students" width='100' headerAlign='center' dataAlign='center' dataFormat={studentsButtonFormatter}>Alumnos</TableHeaderColumn>
             <TableHeaderColumn dataField="exams" width='100' headerAlign='center' dataAlign='center' dataFormat={examsButtonFormatter}>Exámenes</TableHeaderColumn>
-            <TableHeaderColumn dataField="exams" width='100' headerAlign='center' dataAlign='center' dataFormat={freeCheckboxFormatter}>Libres</TableHeaderColumn>
-            <TableHeaderColumn dataField="acceptFree" hidden={ true }>Acepta Libres</TableHeaderColumn>
+            <TableHeaderColumn dataField="acceptFree" width='100' headerAlign='center' dataAlign='center' dataFormat={(cell, row) => freeCheckboxFormatter(cell, row)}>Libres</TableHeaderColumn>
         </BootstrapTable>
       </div>
+    );
+  }
+}
+
+class AcceptFreeToggle extends React.Component {
+  render() {
+    return (
+      <ToggleButtonGroup 
+        type="radio" 
+        name="options"
+        value={this.props.acceptFree}
+        onChange={(e) => this.props.handleChange(e,this.props.row)}>
+          <ToggleButton value={1}>Si</ToggleButton>
+          <ToggleButton value={2}>No</ToggleButton>
+      </ToggleButtonGroup>
     );
   }
 }

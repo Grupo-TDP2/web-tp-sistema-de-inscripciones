@@ -6,7 +6,6 @@ import {Glyphicon, Button} from 'react-bootstrap';
 import { ToastContainer } from "react-toastr";
 import "./Toastr.css";
 import API_URI from "../config/GeneralConfig.js";
-import teacherAuthToken from "../config/AuthToken.js";
 
 let container;
  
