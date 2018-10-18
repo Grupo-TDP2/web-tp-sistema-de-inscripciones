@@ -146,6 +146,7 @@ export default class TeachersModal extends Component {
                     className="basic-single modal-select sub-flex-item"
                     classNamePrefix="select"
                     placeholder="Seleccione..."
+                    noOptionsMessage={() => "No hay opciones."}
                     onChange={this.handleTeacherChange}
                     defaultValue={""}
                     isSearchable={true}
@@ -157,6 +158,7 @@ export default class TeachersModal extends Component {
                     className="basic-single modal-select sub-flex-item"
                     classNamePrefix="select"
                     placeholder="Seleccione..."
+                    noOptionsMessage={() => "No hay opciones."}
                     onChange={this.handlePositionChange}
                     defaultValue={""}
                     name="position"

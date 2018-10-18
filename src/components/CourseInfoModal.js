@@ -260,6 +260,7 @@ export default class CourseInfoModal extends Component {
                         className="formControl formGroupFlexItem courseModalSelect"
                         classNamePrefix="select"
                         placeholder="Seleccione..."
+                        noOptionsMessage={() => "No hay opciones."}
                         onChange={this.handleSubjectChange}
                         defaultValue={""}
                         isSearchable={true}
@@ -271,6 +272,7 @@ export default class CourseInfoModal extends Component {
                         className="formControl formGroupFlexItem courseModalSelectSmall"
                         classNamePrefix="select"
                         placeholder="Seleccione..."
+                        noOptionsMessage={() => "No hay opciones."}
                         onChange={this.handleLocationChange}
                         defaultValue={""}
                         isSearchable={true}
@@ -282,6 +284,7 @@ export default class CourseInfoModal extends Component {
                         className="formControl formGroupFlexItem courseModalSelectSmall"
                         classNamePrefix="select"
                         placeholder="Seleccione..."
+                        noOptionsMessage={() => "No hay opciones."}
                         onChange={this.handleClassroomChange}
                         defaultValue={""}
                         isSearchable={true}
@@ -297,6 +300,7 @@ export default class CourseInfoModal extends Component {
                                 className="flexRowItem daySelect"
                                 classNamePrefix="select"
                                 placeholder="Dia"
+                                noOptionsMessage={() => "No hay opciones."}
                                 onChange={this.handleDayChange}
                                 defaultValue={""}
                                 isSearchable={true}
@@ -307,6 +311,7 @@ export default class CourseInfoModal extends Component {
                                 className="flexRowItem hourSelect"
                                 classNamePrefix="select"
                                 placeholder="Inicio"
+                                noOptionsMessage={() => "No hay opciones."}
                                 onChange={this.handleStartHourChange}
                                 defaultValue={""}
                                 isSearchable={true}
@@ -317,6 +322,7 @@ export default class CourseInfoModal extends Component {
                                 className="flexRowItem hourSelect"
                                 classNamePrefix="select"
                                 placeholder="Fin"
+                                noOptionsMessage={() => "No hay opciones."}
                                 onChange={this.handleEndHourChange}
                                 defaultValue={""}
                                 isSearchable={true}
@@ -338,6 +344,7 @@ export default class CourseInfoModal extends Component {
                                 className="basic-single modal-select sub-flex-item selectMargin"
                                 classNamePrefix="select"
                                 placeholder="Seleccione..."
+                                noOptionsMessage={() => "No hay opciones."}
                                 onChange={this.handleTeacherChange}
                                 defaultValue={""}
                                 isSearchable={true}
@@ -348,6 +355,7 @@ export default class CourseInfoModal extends Component {
                                 className="basic-single modal-select sub-flex-item selectMargin"
                                 classNamePrefix="select"
                                 placeholder="Seleccione..."
+                                noOptionsMessage={() => "No hay opciones."}
                                 onChange={this.handlePositionChange}
                                 defaultValue={""}
                                 name="position"

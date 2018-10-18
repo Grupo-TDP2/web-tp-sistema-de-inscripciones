@@ -284,7 +284,9 @@ export default class DepartmentCoursesTable extends Component {
         }, {
           text: 'Todos', value: this.state.courses.length
         } ], // you can change the dropdown list for size per page
-        sizePerPage: 10
+        sizePerPage: 10,
+        defaultSortName: 'id',  // default sort column name
+        defaultSortOrder: 'asc'  // default sort order
     };
 
     function buttonFormatter(cell, row){

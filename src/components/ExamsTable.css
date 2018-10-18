@@ -2,3 +2,19 @@
     float: right;
     margin-top: 20px;
 }
+
+.addExamFlex {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.addExamColumnFlex {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.examsSelect {
+    width: 300px;
+}

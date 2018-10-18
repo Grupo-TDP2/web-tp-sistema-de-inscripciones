@@ -1,37 +1,53 @@
 import React, { Component } from "react";
 import { Redirect } from 'react-router-dom';
 import {BootstrapTable, TableHeaderColumn} from 'react-bootstrap-table';
+import Select from 'react-select';
 import axios from 'axios'
-import {Glyphicon, Button} from 'react-bootstrap';
+import {Glyphicon, Button, Row, Col} from 'react-bootstrap';
+import DatePicker from 'react-datepicker';
+import moment from 'moment';
 import { ToastContainer } from "react-toastr";
 import "./Toastr.css";
+import 'react-datepicker/dist/react-datepicker.css';
 import API_URI from "../config/GeneralConfig.js";
 import './ExamsTable.css';
 
 let container;
  
-export default class StudentsTable extends Component {
+export default class ExamsTable extends Component {
 
   constructor(props) {
     super(props);
-    
+
     this.state = {
         exams: [],
         loaderMsg: 'Cargando la informacion...',
         redirect: false,
-        redirectTo: ''
+        redirectTo: '',
+        availableClassrooms: [],
+        availableExamWeeks: [],
+        newBuilding: '',
+        newClassroomID: '',
+        newExamWeekID: '',
+        newDate: ''
     };
 
     this.customTitle = this.customTitle.bind(this);
     this.displayErrorToastr = this.displayErrorToastr.bind(this);
     this.handleDeleteClick = this.handleDeleteClick.bind(this);
     this.handleGoBack = this.handleGoBack.bind(this);
+    this.handleBuildingChange = this.handleBuildingChange.bind(this);
+    this.handleClassroomChange = this.handleClassroomChange.bind(this);
+    this.handleExamWeekChange = this.handleExamWeekChange.bind(this);
+    this.handleDateChange = this.handleDateChange.bind(this);
   }
 
   async componentDidMount() {
     const errorToastr = message => this.displayErrorToastr(message);
     const setLoaderMsg = mLoaderMsg => this.setState({ loaderMsg: mLoaderMsg });
     const setExams = mExams => this.setState({exams: mExams});
+    const setClassrooms = mClassrooms => this.setState({availableClassrooms: mClassrooms});
+    const setExamWeeks = mExamWeeks => this.setState({availableExamWeeks: mExamWeeks});
 
     await axios({
       method:'get',
@@ -39,7 +55,7 @@ export default class StudentsTable extends Component {
       headers: {'Authorization': this.props.childProps.token}
       })
         .then(function(response) {
-          console.log(response);
+          //console.log(response);
 
           if (response.data.length === 0) {
             setLoaderMsg("No hay datos disponibles.");
@@ -76,25 +92,60 @@ export default class StudentsTable extends Component {
           setLoaderMsg("No se pudieron cargar los datos.");
         });
 
-    /*let mStudents = [];
+    await axios({
+      method:'get',
+      url: API_URI + '/classrooms',
+      headers: {'Authorization': this.props.childProps.token}
+      })
+        .then(function(response) {
+          //console.log(response);
 
-    StudentJSONResponse.data.forEach(student => {
-      let mStudent = {
-        studentID: student.id,
-        name: student.student.first_name + ' ' + student.student.last_name,
-        studentNumber: student.student.school_document_number
-      }
+          let mClassrooms = [];
 
-      if (student.type === 'normal') {
-        mStudent.status = 'Regular';
-      } else {
-        mStudent.status = 'Condicional';
-      }
+          response.data.forEach(classroom => {
+            mClassrooms.push({
+              label: classroom.floor + classroom.number,
+              value: classroom.id,
+              link: classroom.building.name
+            });
+          });
 
-      mStudents.push(mStudent);
-    });
+          setClassrooms(mClassrooms);
+        })
+        .catch(function (error) {
+          console.log(error);
+          errorToastr("No se pudieron cargar los datos.");
+          setLoaderMsg("No se pudieron cargar los datos.");
+        });
 
-    this.setState({ students: mStudents });*/
+    await axios({
+      method:'get',
+      url: API_URI + '/final_exam_weeks',
+      headers: {'Authorization': this.props.childProps.token}
+      })
+        .then(function(response) {
+          console.log(response);
+
+          let mExamWeeks = [];
+
+          response.data.forEach(examWeek => {
+            const splitStartDate = examWeek.date_start_week.split("-");
+            mExamWeeks.push({
+              label: splitStartDate[2] + "/" + splitStartDate[1] + "/" + splitStartDate[0],
+              value: examWeek.id,
+              date: examWeek.date_start_week
+            });
+          });
+
+          mExamWeeks.sort((a,b) => Date.parse(a.date) - Date.parse(b.date));
+
+          setExamWeeks(mExamWeeks);
+        })
+        .catch(function (error) {
+          console.log(error);
+          errorToastr("No se pudieron cargar los datos.");
+          setLoaderMsg("No se pudieron cargar los datos.");
+        });
   }
 
   displayErrorToastr(message) {
@@ -105,6 +156,22 @@ export default class StudentsTable extends Component {
 
   customTitle(cell, row, rowIndex, colIndex) {
     return `Doble click para editar`;
+  }
+
+  handleBuildingChange(e) {
+    this.setState({ newBuilding: e.value });
+  }
+
+  handleClassroomChange(e) {
+    this.setState({ newClassroomID: e.value });
+  }
+
+  handleExamWeekChange(e) {
+    this.setState({ newExamWeekID: e.value });
+  }
+
+  handleDateChange(date) {
+    this.setState({ newDate: date });
   }
 
   handleDeleteClick(cell, row) {
@@ -124,6 +191,19 @@ export default class StudentsTable extends Component {
     }
 
     const handleDeleteClick = (cell,row) => this.handleDeleteClick(cell,row);
+
+    const availableBuildings = [
+      {
+        label: "Paseo Colon",
+        value: "PC"
+      },
+      {
+        label: "Las Heras",
+        value: "LH"
+      }
+    ]
+
+    const filteredClassrooms = this.state.availableClassrooms.filter((classroom) => classroom.link === this.state.newBuilding );
 
     const options = {
         noDataText: this.state.loaderMsg,
@@ -150,6 +230,67 @@ export default class StudentsTable extends Component {
 
     return (
       <div>
+        <Row>
+          <Col xs={12} sm={3}>
+            <p>Semana</p>
+            <Select
+              classNamePrefix="select"
+              placeholder="Seleccione..."
+              noOptionsMessage={() => "No hay opciones."}
+              onChange={this.handleExamWeekChange}
+              defaultValue={""}
+              name="name"
+              options={this.state.availableExamWeeks}
+            />
+          </Col>
+          <Col xs={12} sm={3}>
+            <p>Fecha</p>
+            <DatePicker
+                selected={this.state.newDate}
+                onChange={this.handleDateChange}
+            />
+          </Col>
+          <Col xs={12} sm={3}>
+            <p>Hora</p>
+            <Select
+              classNamePrefix="select"
+              placeholder="Seleccione..."
+              noOptionsMessage={() => "No hay opciones."}
+              onChange={this.handleBuildingChange}
+              defaultValue={""}
+              name="name"
+              options={availableBuildings}
+            />
+          </Col>
+          <Col xs={12} sm={2}>
+            <p>Sede</p>
+            <Select
+              classNamePrefix="select"
+              placeholder="Seleccione..."
+              noOptionsMessage={() => "No hay opciones."}
+              onChange={this.handleBuildingChange}
+              defaultValue={""}
+              name="name"
+              options={availableBuildings}
+            />
+          </Col>
+          <Col xs={12} sm={2}>
+            <p>Aula</p>
+            <Select
+              classNamePrefix="select"
+              placeholder="Seleccione..."
+              noOptionsMessage={() => "No hay opciones."}
+              onChange={this.handleClassroomChange}
+              defaultValue={""}
+              isSearchable={true}
+              name="name"
+              options={filteredClassrooms}
+            />
+          </Col>
+          <Col xs={12} sm={2}>
+            <Button className="sub-flex-item" onClick={this.handleSubmitNewTeacher}>Asociar</Button>
+          </Col>
+        </Row>
         <ToastContainer
           ref={ref => container = ref}
           className="toast-top-right"
