@@ -181,9 +181,9 @@ export default class CourseInfoModal extends Component {
             {value: "11:30", label: '11:30', day: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]},
             {value: "12:00", label: '12:00', day: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]},
             {value: "12:30", label: '12:30', day: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]},
-            {value: "13:00", label: '13:00', day: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]},
-            {value: "13:30", label: '13:30', day: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]},
-            {value: "14:00", label: '14:00', day: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]},
+            {value: "13:00", label: '13:00', day: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]},
+            {value: "13:30", label: '13:30', day: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]},
+            {value: "14:00", label: '14:00', day: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]},
             {value: "14:30", label: '14:30', day: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]},
             {value: "15:00", label: '15:00', day: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]},
             {value: "15:30", label: '15:30', day: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]},
@@ -224,7 +224,7 @@ export default class CourseInfoModal extends Component {
 
         const filteredStartHoursList = hoursList.filter((hour) => {
             if (hour.day.includes(this.state.day) && 
-            Date.parse('01/01/2011 ' + hour.value + ":00") < Date.parse('01/01/2011 20:30:00')) {
+            Date.parse('01/01/2011 ' + hour.value + ":00") < Date.parse('01/01/2011 21:30:00')) {
                 return true;
             } else {
                 return false;
@@ -233,6 +233,9 @@ export default class CourseInfoModal extends Component {
         const filteredEndHoursList = hoursList.filter((hour) => {
             if (Date.parse('01/01/2011 ' + hour.value + ":00") > Date.parse('01/01/2011 ' + this.state.startHour + ":00") &&
                 parseInt(hour.value.split(":")[0] ,10) < parseInt(this.state.startHour.split(":")[0], 10) + 4) {
+                    if (this.state.day === "Saturday" && parseInt(hour.value.split(":")[0] ,10) > 15) {
+                        return false;
+                    }
                     return true;
                 } else {
                     return false;

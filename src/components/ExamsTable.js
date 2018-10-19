@@ -29,7 +29,9 @@ export default class ExamsTable extends Component {
         newBuilding: '',
         newClassroomID: '',
         newExamWeekID: '',
-        newDate: ''
+        newExamWeekDate: '',
+        newDate: null,
+        newHour: ''
     };
 
     this.customTitle = this.customTitle.bind(this);
@@ -40,57 +42,18 @@ export default class ExamsTable extends Component {
     this.handleClassroomChange = this.handleClassroomChange.bind(this);
     this.handleExamWeekChange = this.handleExamWeekChange.bind(this);
     this.handleDateChange = this.handleDateChange.bind(this);
+    this.handleHourChange = this.handleHourChange.bind(this);
+    this.addNewExamDate = this.addNewExamDate.bind(this);
+    this.loadExamDates = this.loadExamDates.bind(this);
   }
 
   async componentDidMount() {
     const errorToastr = message => this.displayErrorToastr(message);
     const setLoaderMsg = mLoaderMsg => this.setState({ loaderMsg: mLoaderMsg });
-    const setExams = mExams => this.setState({exams: mExams});
     const setClassrooms = mClassrooms => this.setState({availableClassrooms: mClassrooms});
     const setExamWeeks = mExamWeeks => this.setState({availableExamWeeks: mExamWeeks});
 
-    await axios({
-      method:'get',
-      url: API_URI + '/teachers/me/courses/' + this.props.childProps.courseID + '/exams',
-      headers: {'Authorization': this.props.childProps.token}
-      })
-        .then(function(response) {
-          //console.log(response);
-
-          if (response.data.length === 0) {
-            setLoaderMsg("No hay datos disponibles.");
-          }
-          
-          let mExams = [];
-
-          response.data.forEach(exam => {
-            let mDate = exam.date_time.split("T")[0].split("-");
-            mDate = mDate[2] + "/" + mDate[1] + "/" + mDate[0];
-
-            let mExam = {
-              examID: exam.id,
-              date: mDate,
-              time: exam.date_time.split("T")[1].split(".")[0].substr(0,5),
-              building: exam.classroom.building.name,
-              classroom: exam.classroom.floor + exam.classroom.number
-            }
-
-            if (exam.course.accept_free_condition_exam === true) {
-                mExam.free = "Si";
-            } else {
-                mExam.free = "No";
-            }
-
-            mExams.push(mExam);
-          });
-
-          setExams(mExams);
-        })
-        .catch(function (error) {
-          console.log(error);
-          errorToastr("No se pudieron cargar los datos.");
-          setLoaderMsg("No se pudieron cargar los datos.");
-        });
+    this.loadExamDates();
 
     await axios({
       method:'get',
@@ -148,6 +111,55 @@ export default class ExamsTable extends Component {
         });
   }
 
+  async loadExamDates() {
+    const errorToastr = message => this.displayErrorToastr(message);
+    const setLoaderMsg = mLoaderMsg => this.setState({ loaderMsg: mLoaderMsg });
+    const setExams = mExams => this.setState({exams: mExams});
+
+    await axios({
+      method:'get',
+      url: API_URI + '/teachers/me/courses/' + this.props.childProps.courseID + '/exams',
+      headers: {'Authorization': this.props.childProps.token}
+      })
+        .then(function(response) {
+          //console.log(response);
+
+          if (response.data.length === 0) {
+            setLoaderMsg("No hay datos disponibles.");
+          }
+          
+          let mExams = [];
+
+          response.data.forEach(exam => {
+            let mDate = exam.date_time.split("T")[0].split("-");
+            mDate = mDate[2] + "/" + mDate[1] + "/" + mDate[0];
+
+            let mExam = {
+              examID: exam.id,
+              date: mDate,
+              time: exam.date_time.split("T")[1].split(".")[0].substr(0,5),
+              building: exam.classroom.building.name,
+              classroom: exam.classroom.floor + exam.classroom.number
+            }
+
+            if (exam.course.accept_free_condition_exam === true) {
+                mExam.free = "Si";
+            } else {
+                mExam.free = "No";
+            }
+
+            mExams.push(mExam);
+          });
+
+          setExams(mExams);
+        })
+        .catch(function (error) {
+          console.log(error);
+          errorToastr("No se pudieron cargar los datos.");
+          setLoaderMsg("No se pudieron cargar los datos.");
+        });
+  }
+
   displayErrorToastr(message) {
     container.error(<div></div>, <em>{message}</em>, 
         {closeButton: true, timeOut: 3000}
@@ -167,15 +179,71 @@ export default class ExamsTable extends Component {
   }
 
   handleExamWeekChange(e) {
-    this.setState({ newExamWeekID: e.value });
+    this.setState({ 
+      newExamWeekID: e.value, 
+      newExamWeekDate: e.date,
+      newDate: moment(e.date)
+    });
   }
 
   handleDateChange(date) {
     this.setState({ newDate: date });
   }
 
-  handleDeleteClick(cell, row) {
-    this.displayErrorToastr("Funcion habilitada proximamente.")
+  handleHourChange(e) {
+    this.setState({ newHour: e.value });
+  }  
+
+  async handleDeleteClick(cell, row) {
+    const errorToastr = message => this.displayErrorToastr(message);
+
+    await axios({
+      method:'delete',
+      url: API_URI + "/teachers/me/courses/" + this.props.childProps.courseID + "/exams/" + row.examID,
+      headers: {'Authorization': this.props.childProps.token}
+      })
+        .then(function(response) {
+          console.log(response);
+        })
+        .catch(function (error) {
+          console.log(error);
+          errorToastr("No se pudo eliminar la fecha de examen. Intente nuevamente.");
+        });
+
+    this.loadExamDates();
+  }
+
+  async addNewExamDate() {
+    const errorToastr = message => this.displayErrorToastr(message);
+    const loadExamDates = () => this.loadExamDates();
+
+    const payload = {
+      classroom_id: this.state.newClassroomID,
+      final_exam_week_id: this.state.newExamWeekID,
+      date_time: this.state.newDate.format('YYYY-MM-DD') + " " + this.state.newHour
+    };
+
+    await axios({
+      method:'post',
+      data: {
+          exam: payload
+      },
+      url: API_URI + "/teachers/me/courses/" + this.props.childProps.courseID + "/exams",
+      headers: {'Authorization': this.props.childProps.token}
+      })
+        .then(function(response) {
+          console.log(response);
+
+          loadExamDates();
+        })
+        .catch(function (error) {
+          console.log(error);
+          if (error.toString().includes("422")) {
+            errorToastr("Ya existe una fecha de examen esa semana.");  
+          } else {
+            errorToastr("No se pudo agregar la fecha de examen. Intente nuevamente.");
+          }
+        });
   }
 
   handleGoBack() {
@@ -203,7 +271,53 @@ export default class ExamsTable extends Component {
       }
     ]
 
+    const hoursList = [
+        {value: "7:00", label: '7:00', day: ["Week","Saturday"]},
+        {value: "7:30", label: '7:30', day: ["Week","Saturday"]},
+        {value: "8:00", label: '8:00', day: ["Week","Saturday"]},
+        {value: "8:30", label: '8:30', day: ["Week","Saturday"]},
+        {value: "9:00", label: '9:00', day: ["Week","Saturday"]},
+        {value: "9:30", label: '9:30', day: ["Week","Saturday"]},
+        {value: "10:00", label: '10:00', day: ["Week","Saturday"]},
+        {value: "10:30", label: '10:30', day: ["Week","Saturday"]},
+        {value: "11:00", label: '11:00', day: ["Week","Saturday"]},
+        {value: "11:30", label: '11:30', day: ["Week","Saturday"]},
+        {value: "12:00", label: '12:00', day: ["Week","Saturday"]},
+        {value: "12:30", label: '12:30', day: ["Week","Saturday"]},
+        {value: "13:00", label: '13:00', day: ["Week"]},
+        {value: "13:30", label: '13:30', day: ["Week"]},
+        {value: "14:00", label: '14:00', day: ["Week"]},
+        {value: "14:30", label: '14:30', day: ["Week"]},
+        {value: "15:00", label: '15:00', day: ["Week"]},
+        {value: "15:30", label: '15:30', day: ["Week"]},
+        {value: "16:00", label: '16:00', day: ["Week"]},
+        {value: "16:30", label: '16:30', day: ["Week"]},
+        {value: "17:00", label: '17:00', day: ["Week"]},
+        {value: "17:30", label: '17:30', day: ["Week"]},
+        {value: "18:00", label: '18:00', day: ["Week"]},
+        {value: "18:30", label: '18:30', day: ["Week"]},
+        {value: "19:00", label: '19:00', day: ["Week"]},
+        {value: "19:30", label: '19:30', day: ["Week"]},
+        {value: "20:00", label: '20:00', day: ["Week"]},
+        {value: "20:30", label: '20:30', day: ["Week"]},
+        {value: "21:00", label: '21:00', day: ["Week"]}
+    ];
+
     const filteredClassrooms = this.state.availableClassrooms.filter((classroom) => classroom.link === this.state.newBuilding );
+
+    const filteredHours = hoursList.filter((hour) => {
+      let mDay;
+
+      if (this.state.newDate === null) {
+        mDay = "null";
+      } else if (this.state.newDate.day() === 6) {
+        mDay = "Saturday";
+      } else {
+        mDay = "Week";
+      }
+
+      return hour.day.includes(mDay);
+    });
 
     const options = {
         noDataText: this.state.loaderMsg,
@@ -230,8 +344,8 @@ export default class ExamsTable extends Component {
 
     return (
       <div>
-        <Row>
-          <Col xs={12} sm={3}>
+        <Row className="addDateRow">
+          <Col xs={12} sm={2}>
             <p>Semana</p>
             <Select
               classNamePrefix="select"
@@ -243,23 +357,30 @@ export default class ExamsTable extends Component {
               options={this.state.availableExamWeeks}
             />
           </Col>
-          <Col xs={12} sm={3}>
+          <Col xs={12} sm={2}>
             <p>Fecha</p>
             <DatePicker
+                dateFormat="DD/MM/YYYY"
                 selected={this.state.newDate}
                 onChange={this.handleDateChange}
+                className="datepicker"
+                placeholderText="Seleccione..."
+                minDate={moment(this.state.newExamWeekDate)}
+                maxDate={moment(this.state.newExamWeekDate).add(5, "days")}
+                showDisabledMonthNavigation 
+                disabled={this.state.newExamWeekID === ''}
             />
           </Col>
-          <Col xs={12} sm={3}>
+          <Col xs={12} sm={2}>
             <p>Hora</p>
             <Select
               classNamePrefix="select"
               placeholder="Seleccione..."
               noOptionsMessage={() => "No hay opciones."}
-              onChange={this.handleBuildingChange}
+              onChange={this.handleHourChange}
               defaultValue={""}
               name="name"
-              options={availableBuildings}
+              options={filteredHours}
             />
           </Col>
           <Col xs={12} sm={2}>
@@ -287,8 +408,12 @@ export default class ExamsTable extends Component {
               options={filteredClassrooms}
             />
           </Col>
-          <Col xs={12} sm={2}>
-            <Button className="sub-flex-item" onClick={this.handleSubmitNewTeacher}>Asociar</Button>
+          <Col xs={12} sm={2} className="addDateButtonContainer">
+            <Button className="flexCenterItem" bsStyle="success" onClick={this.addNewExamDate}
+              disabled={this.state.newExamWeekID === '' || this.state.newDate === null || this.state.newHour === ''
+                || this.state.newBuilding === '' || this.state.newClassroomID === ''}>
+              <Glyphicon glyph="plus" />&nbsp;Nueva Fecha
+            </Button>
           </Col>
         </Row>
         <ToastContainer
