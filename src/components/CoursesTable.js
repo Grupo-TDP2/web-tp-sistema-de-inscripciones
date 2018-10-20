@@ -86,39 +86,6 @@ export default class CoursesTable extends Component {
           errorToastr("No se pudieron cargar los datos.");
           setLoaderMsg("No se pudieron cargar los datos.");
         });
-
-    /*let mCourses = [];
-    
-    JSONResponse.data.forEach(course => {
-      let mCourse = {
-        id: course.id,
-        courseID: course.name,
-        subject: course.subject.name,
-        location: '',
-        classroom: ''
-      }
-
-      if (course.lesson_schedules.length > 0) {
-        let mSchedule = '';
-        
-        course.lesson_schedules.forEach(lessonSchedule => {
-          let mStartHour = lessonSchedule.hour_start.split('T')[1].substr(0,5);
-          let mEndHour = lessonSchedule.hour_end.split('T')[1].substr(0,5);
-
-          mSchedule = mSchedule + lessonSchedule.day + ' ' + mStartHour + ' - ' + mEndHour;
-
-          mSchedule = mSchedule + '\n';
-        });
-
-        mCourse.schedule = mSchedule;
-      } else {
-        mCourse.schedule = '';
-      }
-      
-      mCourses.push(mCourse);
-    });
-
-    this.setState({ courses: mCourses });*/
   }
 
   displayErrorToastr(message) {
