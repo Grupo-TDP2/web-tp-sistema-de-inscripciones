@@ -136,7 +136,7 @@ export default class StudentsTable extends Component {
     this.setState({ setGradeModal: '' });
   }
 
-  handleChangeApproval(e, row) {
+  async handleChangeApproval(e, row) {
     if (e === 1) {
       const modalProps = {
         handleClose: this.handleStudentModalClose,
@@ -145,6 +145,36 @@ export default class StudentsTable extends Component {
       }
 
       this.setState({ setGradeModal: <SetGradeModal modalProps={modalProps}/>});
+    } else {
+      const errorToastr = message => this.displayErrorToastr(message);
+
+      const mEnrolment = {
+        partial_qualification: null
+      };
+
+      if (e === 2) {
+        mEnrolment.status = "disapproved";
+      } else {
+        mEnrolment.status = "not_evaluated";
+      }
+
+      await axios({
+        method:'put',
+        data: {
+            enrolment: mEnrolment
+        },
+        url: API_URI + "/teachers/me/courses/" + this.props.childProps.courseID + "/enrolments/" + row.studentID,
+        headers: {'Authorization': this.props.childProps.token}
+        })
+          .then(function(response) {
+            console.log(response);
+          })
+          .catch(function (error) {
+            console.log(error);
+            errorToastr("No se pudo editar la información del alumno. Intente nuevamente.");
+          });
+
+      this.loadStudents();
     }
   }
 
