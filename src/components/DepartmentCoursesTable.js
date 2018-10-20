@@ -234,7 +234,6 @@ export default class DepartmentCoursesTable extends Component {
           } else {
             errorToastr("No se pudo asociar al docente. Intente nuevamente.");
           }
-          
         });
 
     return response;
