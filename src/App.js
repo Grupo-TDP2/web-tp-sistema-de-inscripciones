@@ -87,6 +87,14 @@ class App extends Component {
                 </Fragment>
               : <Fragment/>
             }
+            {this.state.isAuthenticated && this.state.role === 'Admin'
+              ? <Fragment>
+                  <LinkContainer to="/schoolTerms" activeClassName="">
+                    <NavItem>Períodos Lectivos</NavItem>
+                  </LinkContainer>
+                </Fragment>
+              : <Fragment/>
+            }
             </Nav>
             <Nav pullRight>
             {this.state.isAuthenticated

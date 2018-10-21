@@ -61,6 +61,8 @@ export default class Login extends Component {
             goToRoute("/teacherCourses");
           } else if (response.data.role === "DepartmentStaff") {
             goToRoute("/departmentCourses");
+          } else if (response.data.role === "Admin") {
+            goToRoute("/schoolTerms");
           } else {
             goToRoute("/");
           }

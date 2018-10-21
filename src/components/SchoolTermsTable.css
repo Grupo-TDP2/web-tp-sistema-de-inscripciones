@@ -1,0 +1,22 @@
+.flexParent {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.tableTitle {
+    margin-top: auto;
+    margin-bottom: auto;
+    align-self: center;
+}
+
+.outTableButton {
+    margin-bottom: 5px;
+    margin-right: 5px;
+    height: 30px;
+    font-size: 12px;
+    align-self: center;
+    margin-top: auto;
+    margin-bottom: auto;
+}
