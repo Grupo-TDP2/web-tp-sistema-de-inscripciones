@@ -167,6 +167,7 @@ export default class DepartmentCoursesTable extends Component {
   async addNewCourse(course) {
     const errorToastr = message => this.displayErrorToastr(message);
     const loadCourses = () => this.loadCourses();
+    const closeCourseModal = () => this.setState({ showCourseModal: false });
 
     await axios({
       method:'post',
@@ -183,6 +184,8 @@ export default class DepartmentCoursesTable extends Component {
       })
         .then(function(response) {
           console.log(response);
+
+          closeCourseModal();
 
           loadCourses();
         })

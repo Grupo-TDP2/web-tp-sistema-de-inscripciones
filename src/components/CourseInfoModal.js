@@ -37,16 +37,7 @@ export default class CourseInfoModal extends Component {
 
       this.state = {
         show: true,
-        subjectList: [
-            {
-                label: "75.12 Analisis de la Informacion",
-                value: "aninfo"
-            },
-            {
-                label: "75.40 Computacion",
-                value: "compu"
-            }
-        ],
+        subjectList: [],
         subject: "",
         location: "",
         classroomList: [],
@@ -89,8 +80,34 @@ export default class CourseInfoModal extends Component {
         const errorToastr = message => this.displayErrorToastr(message);
         const setLoaderMsg = mLoaderMsg => this.setState({ loaderMsg: mLoaderMsg });
         const setSchoolTerms = mSchoolTerms => this.setState({ schoolTermList: mSchoolTerms });
+        const setSubjects = mSubjects => this.setState({ subjectList: mSubjects });
         const setTeachers = mTeachers => this.setState({ teacherList: mTeachers });
         const setClassrooms = mClassrooms => this.setState({ classroomList: mClassrooms });
+
+        await axios({
+            method:'get',
+            url: API_URI + '/departments/me/courses',
+            headers: {'Authorization': this.props.childProps.token}
+            })
+              .then(function(response) {
+                //console.log(response);
+      
+                let mSubjects = [];
+      
+                response.data.forEach(subject => {
+                  mSubjects.push({
+                    label: subject.name,
+                    value: subject.id
+                  });
+                });
+      
+                setSubjects(mSubjects);
+              })
+              .catch(function (error) {
+                console.log(error);
+                errorToastr("No se pudieron cargar los datos.");
+                setLoaderMsg("No se pudieron cargar los datos.");
+              });
 
         await axios({
             method:'get',
@@ -296,7 +313,6 @@ export default class CourseInfoModal extends Component {
         };
 
         this.props.childProps.addNewCourse(newCourse);
-        this.props.childProps.handleClose();
     }
 
     render() {
@@ -617,7 +633,7 @@ export default class CourseInfoModal extends Component {
                     {this.props.childProps.mode === 'new'
                         ? <Button className="footerFlexItem" bsStyle="success" onClick={this.submitNewCourse}
                             disabled={this.state.subject === '' || this.state.schoolTerm === '' || this.state.courseName === '' 
-                            || this.state.schedules.length === 0 || this.state.currentTeachers.length === 0 || this.state.vacancies === ''}>Crear Curso</Button>
+                            || this.state.schedules.length === 0 || this.state.vacancies === ''}>Crear Curso</Button>
                         : <Button className="footerFlexItem">Guardar</Button>
                     }
                     <Button className="footerFlexItem" bsStyle="danger" onClick={this.props.childProps.handleClose}>Cancelar</Button>
