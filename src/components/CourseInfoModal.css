@@ -71,11 +71,11 @@
 }
 
 .daySelect {
-    width: 130px;
+    width: 225px;
 }
 
 .hourSelect {
-    width: 90px;
+    width: 145px;
 }
 
 .footerFlex {
@@ -103,4 +103,15 @@
         margin-right: 20px;
         margin-left: 20px;
     }
+}
+
+.subFlex {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    width: 100%;
+}
+
+.marginLeft {
+    margin-left: 10px;
 }
