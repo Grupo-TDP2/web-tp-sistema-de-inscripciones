@@ -20,6 +20,7 @@ export default class SchoolTerms extends Component {
     return (
       this.props.isAuthenticated &&
       <div>
+        <h1>Períodos Lectivos</h1>
         <SchoolTermsTable childProps={childProps}/>
       </div>
     );

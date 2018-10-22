@@ -2,10 +2,13 @@ import React, { Component } from "react";
 import { Redirect } from 'react-router-dom';
 import {BootstrapTable, TableHeaderColumn} from 'react-bootstrap-table';
 import axios from 'axios'
-import {Glyphicon, Button} from 'react-bootstrap';
+import {Glyphicon, Button, Row, Col} from 'react-bootstrap';
 import { ToastContainer } from "react-toastr";
 import moment from 'moment';
+import DatePicker from 'react-datepicker';
+import Select from 'react-select';
 import "./Toastr.css";
+import 'react-datepicker/dist/react-datepicker.css';
 import "./SchoolTermsTable.css";
 import API_URI from "../config/GeneralConfig.js";
 
@@ -20,16 +23,33 @@ export default class SchoolTermsTable extends Component {
         schoolTerms: [],
         loaderMsg: 'Cargando la informacion...',
         redirect: false,
-        redirectTo: ''
+        redirectTo: '',
+        newTerm: '',
+        newYear: '',
+        newStartDate: null,
+        newEndDate: null,
+        startRange: '',
+        endRange: '',
+        weeks: 8
     };
 
     this.displayErrorToastr = this.displayErrorToastr.bind(this);
+    this.handleTermChange = this.handleTermChange.bind(this);
+    this.handleYearChange = this.handleYearChange.bind(this);
+    this.handleStartDateChange = this.handleStartDateChange.bind(this);
+    this.addNewSchoolTerm = this.addNewSchoolTerm.bind(this);
+    this.handleDeleteClick = this.handleDeleteClick.bind(this);
   }
 
   async componentDidMount() {
+    this.loadSchoolTerms();
+  }
+
+  async loadSchoolTerms() {
     const errorToastr = message => this.displayErrorToastr(message);
     const setLoaderMsg = mLoaderMsg => this.setState({ loaderMsg: mLoaderMsg });
     const setSchoolTerms = mSchoolTerms => this.setState({schoolTerms: mSchoolTerms});
+    const getTermMappings = () => this.termMappings;
 
     await axios({
       method:'get',
@@ -52,10 +72,12 @@ export default class SchoolTermsTable extends Component {
                 date_end: moment(schoolTerm.date_end).format('DD/MM/YYYY'),
             }
 
-            if (schoolTerm.term === "first_semester") {
-                mSchoolTerm.term = "Primer Cuatrimestre";
+            if (schoolTerm.term === 'first_semester') {
+              mSchoolTerm.term = 'Primer Cuatrimestre';
+            } else if (schoolTerm.term === 'second_semester') {
+              mSchoolTerm.term = 'Segundo Cuatrimestre';
             } else {
-                mSchoolTerm.term = "Segundo Cuatrimestre";
+              mSchoolTerm.term = 'Curso de Verano';
             }
 
             mSchoolTerms.push(mSchoolTerm);
@@ -70,6 +92,86 @@ export default class SchoolTermsTable extends Component {
         });
   }
 
+  handleTermChange(e) {
+    this.setState({ newTerm: e.value });
+
+    let mSplitStartRange = this.state.startRange.split("-");
+
+    if (e.value === 'first_semester') {
+      mSplitStartRange[1] = "3";
+      this.setState({ weeks: 15});
+    } else if (e.value === 'second_semester') {
+      mSplitStartRange[1] = "8";
+      this.setState({ weeks: 15});
+    } else {
+      mSplitStartRange[1] = "1";
+      this.setState({ weeks: 7});
+    }
+
+    this.setState({ startRange: mSplitStartRange.join('-') });
+  }
+
+  handleYearChange(e) {
+    this.setState({ newYear: e.value });
+
+    if (this.state.startRange === '') {
+      this.setState({ startRange: e.value + '-1-1' });
+    } else {
+      let splitDate = this.state.startRange.split('-');
+      splitDate[0] = e.value;
+      this.setState({ startRange: splitDate.join('-') });
+    }
+  }
+
+  handleStartDateChange(date) {
+    this.setState({ newStartDate: date });
+
+    if (this.state.newTerm === 'summer_school') {
+      let mEndDate = date.add(16, "weeks").day("Monday");
+      this.setState({ newEndDate: mEndDate});
+    } else {
+      let mEndDate = date.add(8, "weeks").day("Monday");
+      this.setState({ newEndDate: mEndDate});
+    }
+    
+  }
+
+  handleDeleteClick(cell, row) {
+
+  }
+
+  async addNewSchoolTerm() {
+    const errorToastr = message => this.displayErrorToastr(message);
+    const loadSchoolTerms = () => this.loadSchoolTerms();
+
+    const payload = {
+      term: this.state.newTerm,
+      year: this.state.newYear,
+      date_start: this.state.newStartDate.format("YYYY-MM-DD"),
+      date_end: this.state.newEndDate.format("YYYY-MM-DD")
+    };
+
+    console.log(payload);
+
+    await axios({
+      method:'post',
+      data: {
+          school_term: payload
+      },
+      url: API_URI + "/school_terms",
+      headers: {'Authorization': this.props.childProps.token}
+      })
+        .then(function(response) {
+          console.log(response);
+
+          loadSchoolTerms();
+        })
+        .catch(function (error) {
+          console.log(error);
+          errorToastr("No se pudo crear el período lectivo. Intente nuevamente.");
+        });
+  }
+
   displayErrorToastr(message) {
     container.error(<div></div>, <em>{message}</em>, 
         {closeButton: true, timeOut: 3000}
@@ -80,6 +182,8 @@ export default class SchoolTermsTable extends Component {
     if (this.state.redirect) {
       return <Redirect push to={`${this.state.redirectTo}`} />;
     }
+
+    const handleDeleteClick = (cell,row) => this.handleDeleteClick(cell,row);
 
     const options = {
         noDataText: this.state.loaderMsg,
@@ -98,11 +202,28 @@ export default class SchoolTermsTable extends Component {
 
     function buttonFormatter(cell, row){
       return (
-        <Button className="submitButton">
-            <Glyphicon glyph="education" />&nbsp;
+        <Button className="submitButton" bsStyle="danger" onClick={() => handleDeleteClick(cell,row)}>
+            <Glyphicon glyph="trash" />&nbsp;
         </Button>
       );
     }
+
+    const availableTerms = [
+      {label: 'Primer Cuatrimestre', value: 'first_semester'},
+      {label: 'Segundo Cuatrimestre', value: 'second_semester'},
+      {label: 'Curso de Verano', value: 'summer_school'}
+    ];
+
+    const availableYears = [
+      {label: '2018', value: '2018'},
+      {label: '2019', value: '2019'},
+      {label: '2020', value: '2020'}
+    ];
+
+    const isMonday = date => {
+      const day = date.day();
+      return day === 1;
+    };
 
     return (
       <div>
@@ -111,13 +232,55 @@ export default class SchoolTermsTable extends Component {
           className="toast-top-right"
         />
 
-        <div className="flexParent">
-            <h1 className="tableTitle">Períodos Lectivos</h1>
-
-            <Button className="outTableButton" bsStyle="success">
-                <Glyphicon glyph="plus" /> Nuevo Período Lectivo
+        <Row className="addDateRow">
+          <Col xs={12} sm={2}>
+            <p>Año</p>
+            <Select
+              classNamePrefix="select"
+              placeholder="Seleccione..."
+              noOptionsMessage={() => "No hay opciones."}
+              onChange={this.handleYearChange}
+              defaultValue={""}
+              name="name"
+              options={availableYears}
+            />
+          </Col>
+          <Col xs={12} sm={3}>
+            <p>Cuatrimestre</p>
+            <Select
+              classNamePrefix="select"
+              placeholder="Seleccione..."
+              noOptionsMessage={() => "No hay opciones."}
+              onChange={this.handleTermChange}
+              isDisabled={this.state.newYear === ''}
+              defaultValue={""}
+              name="name"
+              options={availableTerms}
+            />
+          </Col>
+          <Col xs={12} sm={2}>
+            <p>Fecha de inicio</p>
+            <DatePicker
+                dateFormat="DD/MM/YYYY"
+                selected={this.state.newStartDate}
+                onChange={this.handleStartDateChange}
+                className="datepicker"
+                placeholderText="Seleccione..."
+                filterDate={isMonday}
+                minDate={moment(this.state.startRange)}
+                maxDate={moment(this.state.startRange).endOf("month")}
+                showDisabledMonthNavigation 
+                disabled={this.state.newTerm === ''}
+            />
+          </Col>
+          <Col xs={12} sm={3} className="addDateButtonContainer">
+            <Button className="flexCenterItem" bsStyle="success" onClick={this.addNewSchoolTerm}
+              disabled={this.state.newYear === '' || this.state.newTerm === '' || this.state.newStartDate === null
+                || this.state.newEndDate === null}>
+              <Glyphicon glyph="plus" />&nbsp;Nuevo Período Lectivo
             </Button>
-        </div>
+          </Col>
+        </Row>
 
         <BootstrapTable ref='schoolTermsTable' data={ this.state.schoolTerms } options={ options }
                     headerStyle={ { background: '#f8f8f8' } } pagination={ true } search={ true } searchPlaceholder={'Buscar'}>
@@ -126,6 +289,7 @@ export default class SchoolTermsTable extends Component {
             <TableHeaderColumn dataField='year' width='130' headerAlign='center' dataAlign='center'>Año</TableHeaderColumn>
             <TableHeaderColumn dataField='date_end' headerAlign='center' dataAlign='center' tdStyle={ { whiteSpace: 'normal' } }>Fecha de inicio</TableHeaderColumn>
             <TableHeaderColumn dataField='date_start' headerAlign='center' dataAlign='center' tdStyle={ { whiteSpace: 'normal' } }>Fecha de finalización</TableHeaderColumn>
+            <TableHeaderColumn dataField="button" width='100' headerAlign='center' dataAlign='center' dataFormat={buttonFormatter}>Acciones</TableHeaderColumn>
         </BootstrapTable>
       </div>
     );
