@@ -115,13 +115,39 @@ export default class CoursesTable extends Component {
               let mLocation = '';
               let mClassroom = '';
               
-              course.lesson_schedules.forEach(lessonSchedule => {
-                let mStartHour = lessonSchedule.hour_start.split('T')[1].substr(0,5);
-                let mEndHour = lessonSchedule.hour_end.split('T')[1].substr(0,5);
+              let mSchedules = [];
 
-                mSchedule = mSchedule + lessonSchedule.day + ' ' + mStartHour + ' - ' + mEndHour;
-                mLocation = mLocation + lessonSchedule.classroom.building.name + '\n';
-                mClassroom = mClassroom + lessonSchedule.classroom.floor + lessonSchedule.classroom.number + '\n';
+              course.lesson_schedules.forEach(schedule => {
+                mSchedules.push({
+                  startHour: schedule.hour_start.split('T')[1].substr(0,5),
+                  endHour: schedule.hour_end.split('T')[1].substr(0,5),
+                  day: schedule.day,
+                  location: schedule.classroom.building.name,
+                  classroom: schedule.classroom.floor + schedule.classroom.number
+                });
+              });
+
+              const dayMappings = {
+                "Lunes": 1,
+                "Martes": 2,
+                "Miércoles": 3,
+                "Jueves": 4,
+                "Viernes": 5,
+                "Sábado": 6
+              };
+
+              mSchedules.sort((a,b) => {
+                if (dayMappings[a.day] !== dayMappings[b.day]) {
+                  return dayMappings[a.day] - dayMappings[b.day];
+                } else {
+                  return a.startHour.split(":")[0] - b.startHour.split(":")[0];
+                }
+              });
+
+              mSchedules.forEach(lessonSchedule => {
+                mSchedule = mSchedule + lessonSchedule.day + ' ' + lessonSchedule.startHour + ' - ' + lessonSchedule.endHour;
+                mLocation = mLocation + lessonSchedule.location + '\n';
+                mClassroom = mClassroom + lessonSchedule.classroom + '\n';
 
                 mSchedule = mSchedule + '\n';
               });

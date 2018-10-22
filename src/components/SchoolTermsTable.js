@@ -227,6 +227,23 @@ export default class SchoolTermsTable extends Component {
       );
     }
 
+    function dateSortFunction(a, b, order) {   // order is desc or asc
+      console.log(a);
+      console.log(b);
+
+      const splitA = a.date_start.split("/");
+      const splitB = b.date_start.split("/");
+
+      const newA = parseInt(splitA[2])*10000 + parseInt(splitA[1])*100 + parseInt(splitA[0]);
+      const newB = parseInt(splitB[2])*10000 + parseInt(splitB[1])*100 + parseInt(splitB[0]);
+      
+      if (order === 'desc') {
+        return newA - newB;
+      } else {
+        return newB - newA;
+      }
+    }
+
     const availableTerms = [
       {label: 'Primer Cuatrimestre', value: 'first_semester'},
       {label: 'Segundo Cuatrimestre', value: 'second_semester'},
@@ -306,7 +323,7 @@ export default class SchoolTermsTable extends Component {
             <TableHeaderColumn dataField='id' isKey={ true } hidden={ true }>ID</TableHeaderColumn>
             <TableHeaderColumn dataField='term' width='250' headerAlign='center' dataAlign='center'>Cuatrimestre</TableHeaderColumn>
             <TableHeaderColumn dataField='year' width='130' headerAlign='center' dataAlign='center'>Año</TableHeaderColumn>
-            <TableHeaderColumn dataField='date_start' headerAlign='center' dataAlign='center' tdStyle={ { whiteSpace: 'normal' } }>Fecha de inicio</TableHeaderColumn>
+            <TableHeaderColumn dataField='date_start' headerAlign='center' dataAlign='center' dataSort sortFunc={ dateSortFunction } tdStyle={ { whiteSpace: 'normal' } }>Fecha de inicio</TableHeaderColumn>
             <TableHeaderColumn dataField='date_end' headerAlign='center' dataAlign='center' tdStyle={ { whiteSpace: 'normal' } }>Fecha de finalización</TableHeaderColumn>
             <TableHeaderColumn dataField="button" width='100' headerAlign='center' dataAlign='center' dataFormat={buttonFormatter}>Acciones</TableHeaderColumn>
         </BootstrapTable>
