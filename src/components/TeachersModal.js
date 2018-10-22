@@ -25,6 +25,10 @@ export default class TeachersModal extends Component {
         {
           label: "Asistente Segundo",
           value: "second_assistant"
+        },
+        {
+          label: "Ayudante Ad-Honorem",
+          value: "ad_honorem"
         }
       ];
 
@@ -32,7 +36,8 @@ export default class TeachersModal extends Component {
         'course_chief': 'Titular',
         'practice_chief': 'Jefe Trabajos Prácticos',
         'first_assistant': 'Asistente Primero',
-        'second_assistant': 'Asistente Segundo'
+        'second_assistant': 'Asistente Segundo',
+        'ad_honorem': 'Ayudante Ad-Honorem'
       }
 
       this.state = {
@@ -141,8 +146,9 @@ export default class TeachersModal extends Component {
                     className="basic-single modal-select sub-flex-item"
                     classNamePrefix="select"
                     placeholder="Seleccione..."
+                    noOptionsMessage={() => "No hay opciones."}
                     onChange={this.handleTeacherChange}
-                    defaultValue={this.state.availableTeachers[0]}
+                    defaultValue={""}
                     isSearchable={true}
                     name="name"
                     options={this.state.availableTeachers}
@@ -151,8 +157,10 @@ export default class TeachersModal extends Component {
                   <Select
                     className="basic-single modal-select sub-flex-item"
                     classNamePrefix="select"
+                    placeholder="Seleccione..."
+                    noOptionsMessage={() => "No hay opciones."}
                     onChange={this.handlePositionChange}
-                    defaultValue={this.positions[0]}
+                    defaultValue={""}
                     name="position"
                     options={this.positions}
                   />

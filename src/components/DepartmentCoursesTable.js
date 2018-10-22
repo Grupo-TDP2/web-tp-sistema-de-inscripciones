@@ -38,16 +38,13 @@ export default class DepartmentCoursesTable extends Component {
         departmentList: []
     };
 
-    this.customTitle = this.customTitle.bind(this);
     this.displayErrorToastr = this.displayErrorToastr.bind(this);
-    this.handleEditClick = this.handleEditClick.bind(this);
     this.handleDeleteClick = this.handleDeleteClick.bind(this);
     this.handleNewCourseClick = this.handleNewCourseClick.bind(this);
     this.handleCourseModalClose = this.handleCourseModalClose.bind(this);
     this.handleTeachersModalClose = this.handleTeachersModalClose.bind(this);
     this.handleTeachersMoreInfoClick = this.handleTeachersMoreInfoClick.bind(this);
     this.addNewCourse = this.addNewCourse.bind(this);
-    this.handleTeacherDeleteClick = this.handleTeacherDeleteClick.bind(this);
     this.handleAddTeacher = this.handleAddTeacher.bind(this);
     this.loadCourses = this.loadCourses.bind(this);
     this.handleDepartmentChange = this.handleDepartmentChange.bind(this);
@@ -191,41 +188,68 @@ export default class DepartmentCoursesTable extends Component {
       );
   }
 
-  customTitle(cell, row, rowIndex, colIndex) {
-    return `Doble click para editar`;
+  async handleDeleteClick(cell, row) {
+    const errorToastr = message => this.displayErrorToastr(message);
+    const loadCourses = () => this.loadCourses();
+
+    await axios({
+      method:'delete',
+      url: API_URI + "/departments/me/courses/" + row.id,
+      headers: {'Authorization': this.props.childProps.token}
+      })
+        .then(function(response) {
+          console.log(response);
+
+          loadCourses();
+        })
+        .catch(function (error) {
+          console.log(error);
+          errorToastr("No se pudo eliminar el curso. Intente nuevamente.");
+        });
   }
 
-  handleEditClick(cell, row) {
-    /*this.setState({ 
-        showCourseModal: true,
-        courseModalProps: {
-            mode: 'edit',
-            handleClose: this.handleCourseModalClose,
-            courseInfo: row
-        }
-    });*/
-    this.displayErrorToastr("Funcionalidad habilitada proximamente.");
-  }
+  async addNewCourse(course) {
+    const errorToastr = message => this.displayErrorToastr(message);
+    const loadCourses = () => this.loadCourses();
+    const closeCourseModal = () => this.setState({ showCourseModal: false });
 
-  handleDeleteClick(cell, row) {
-    this.displayErrorToastr("Funcionalidad habilitada proximamente.");
-  }
+    await axios({
+      method:'post',
+      data: {
+        name: course.name,
+        vacancies: course.vacancies,
+        subject_id: course.subject_id,
+        school_term_id: course.school_term_id,
+        lesson_schedules: course.lesson_schedules,
+        teacher_courses: course.teacher_courses
+      },
+      url: API_URI + "/departments/me/courses",
+      headers: {'Authorization': this.props.childProps.token}
+      })
+        .then(function(response) {
+          console.log(response);
 
-  addNewCourse(course) {
-    //ASD
+          closeCourseModal();
+
+          loadCourses();
+        })
+        .catch(function (error) {
+          console.log(error);
+          errorToastr("No se pudo crear el curso. Intente nuevamente.");
+        });
   }
 
   handleNewCourseClick() {
-    /*this.setState({ 
+    this.setState({ 
         showCourseModal: true,
         courseModalProps: {
             mode: 'new',
             handleClose: this.handleCourseModalClose,
             addNewCourse: this.addNewCourse,
+            displayErrorToastr: this.displayErrorToastr,
             token: this.props.childProps.token
         } 
-    });*/
-    this.displayErrorToastr("Funcionalidad habilitada proximamente.");
+    });
   }
 
   handleCourseModalClose() {
@@ -290,11 +314,6 @@ export default class DepartmentCoursesTable extends Component {
     });
   }
 
-  handleTeacherDeleteClick(row, teacherName) {
-    console.log(row);
-    console.log(teacherName);
-  }
-
   handleDepartmentChange(e) {
     this.setState({getURL: "/departments/" + e.value + "/subjects"});
 
@@ -316,9 +335,7 @@ export default class DepartmentCoursesTable extends Component {
       modal = <div />
     }
 
-    const handleEditClick = (cell,row) => this.handleEditClick(cell,row);
     const handleDeleteClick = (cell,row) => this.handleDeleteClick(cell,row);
-    //const handleTeacherDeleteClick = (row, teacherName) => this.handleTeacherDeleteClick(row, teacherName);
     const handleTeachersMoreInfoClick = (row) => this.handleTeachersMoreInfoClick(row);
 
     const options = {
@@ -333,15 +350,14 @@ export default class DepartmentCoursesTable extends Component {
         }, {
           text: 'Todos', value: this.state.courses.length
         } ], // you can change the dropdown list for size per page
-        sizePerPage: 10
+        sizePerPage: 10,
+        defaultSortName: 'id',  // default sort column name
+        defaultSortOrder: 'asc'  // default sort order
     };
 
     function buttonFormatter(cell, row){
       return (
         <div>
-            <Button className="action-button" onClick={() => handleEditClick(cell,row)}>
-                <Glyphicon glyph="pencil" />&nbsp;
-            </Button>
             <Button className="action-button" bsStyle="danger" onClick={() => handleDeleteClick(cell,row)}>
                 <Glyphicon glyph="trash" />&nbsp;
             </Button>
@@ -350,21 +366,6 @@ export default class DepartmentCoursesTable extends Component {
     }
 
     function teachersFormatter(cell, row) {
-      /*var teacherItems = row.teachers.map(function(teacher) {
-        return (
-            <div className="teacher-flex" key={teacher.name}>
-              <p className="teacher-flex-item teacher-name">{teacher.name + ' [' + teacher.type + '] '}</p>
-              <Button className="teacher-flex-item teacher-btn" onClick={() => handleTeacherDeleteClick(row, teacher.name)}>
-                  <Glyphicon glyph="remove" />&nbsp;
-              </Button>
-            </div>
-        );
-      });
-
-      return (
-        <div>{teacherItems}</div>
-      );*/
-
       let teacherNames = "";
 
       row.teachers.forEach(teacher => {
@@ -381,7 +382,7 @@ export default class DepartmentCoursesTable extends Component {
         <div className="teacher-flex-aux">
           <div className="teacher-flex-aux-item">{teacherNames}</div>
           <Button className="teacher-flex-aux-item teacher-more-btn" onClick={() => handleTeachersMoreInfoClick(row)}>
-              <Glyphicon glyph="user" /> Ver
+              <Glyphicon glyph="user" />
           </Button>
         </div>
       );
