@@ -67,6 +67,7 @@ export default class SchoolTermsTable extends Component {
 
           response.data.forEach(schoolTerm => {
             let mSchoolTerm = {
+                id: schoolTerm.id,
                 year: schoolTerm.year,
                 date_start: moment(schoolTerm.date_start).format('DD/MM/YYYY'),
                 date_end: moment(schoolTerm.date_end).format('DD/MM/YYYY'),
@@ -126,18 +127,36 @@ export default class SchoolTermsTable extends Component {
   handleStartDateChange(date) {
     this.setState({ newStartDate: date });
 
+    let mEndDate = moment(date);
+
     if (this.state.newTerm === 'summer_school') {
-      let mEndDate = date.add(16, "weeks").day("Monday");
+      mEndDate = mEndDate.add(8, "weeks").day("Monday");
       this.setState({ newEndDate: mEndDate});
     } else {
-      let mEndDate = date.add(8, "weeks").day("Monday");
+      mEndDate = mEndDate.add(16, "weeks").day("Monday");
       this.setState({ newEndDate: mEndDate});
     }
     
   }
 
-  handleDeleteClick(cell, row) {
+  async handleDeleteClick(cell, row) {
+    const errorToastr = message => this.displayErrorToastr(message);
+    const loadSchoolTerms = () => this.loadSchoolTerms();
 
+    await axios({
+      method:'delete',
+      url: API_URI + "/school_terms/" + row.id,
+      headers: {'Authorization': this.props.childProps.token}
+      })
+        .then(function(response) {
+          console.log(response);
+
+          loadSchoolTerms();
+        })
+        .catch(function (error) {
+          console.log(error);
+          errorToastr("No se pudo eliminar el período lectivo. Intente nuevamente.");
+        });
   }
 
   async addNewSchoolTerm() {
@@ -233,7 +252,7 @@ export default class SchoolTermsTable extends Component {
         />
 
         <Row className="addDateRow">
-          <Col xs={12} sm={2}>
+          <Col xs={12} sm={3}>
             <p>Año</p>
             <Select
               classNamePrefix="select"
