@@ -92,6 +92,12 @@ class App extends Component {
                   <LinkContainer to="/schoolTerms" activeClassName="">
                     <NavItem>Períodos Lectivos</NavItem>
                   </LinkContainer>
+                  <LinkContainer to="/teacherCourses" activeClassName="">
+                    <NavItem>Cursos - Docente</NavItem>
+                  </LinkContainer>
+                  <LinkContainer to="/departmentCourses" activeClassName="">
+                    <NavItem>Cursos - Departamento</NavItem>
+                  </LinkContainer>
                 </Fragment>
               : <Fragment/>
             }

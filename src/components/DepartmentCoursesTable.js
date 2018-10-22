@@ -9,6 +9,7 @@ import "./DepartmentCoursesTable.css";
 import API_URI from "../config/GeneralConfig.js";
 import CourseInfoModal from "./CourseInfoModal";
 import TeachersModal from "./TeachersModal";
+import Select from 'react-select';
 
 let container;
 
@@ -32,7 +33,9 @@ export default class DepartmentCoursesTable extends Component {
         showCourseModal: false,
         courseModalProps: null,
         showTeachersModal: false,
-        teachersModalProps: null
+        teachersModalProps: null,
+        getURL: "/departments/me/courses",
+        departmentList: []
     };
 
     this.customTitle = this.customTitle.bind(this);
@@ -47,30 +50,63 @@ export default class DepartmentCoursesTable extends Component {
     this.handleTeacherDeleteClick = this.handleTeacherDeleteClick.bind(this);
     this.handleAddTeacher = this.handleAddTeacher.bind(this);
     this.loadCourses = this.loadCourses.bind(this);
+    this.handleDepartmentChange = this.handleDepartmentChange.bind(this);
   }
 
   async componentDidMount() {
-    //ARGERICH
-    //const authTokenArgerich = 'eyJhbGciOiJIUzI1NiJ9.eyJkYXRhIjp7ImlkIjo1fSwiZXhwIjoxNTQzNjA1ODg0fQ.vYf2ZbJumUyTNcEtL-b5A2dWS03i6RYRL-EZWZ7VmOs';
-    //FONTELA
-    //const authTokenFontela = 'eyJhbGciOiJIUzI1NiJ9.eyJkYXRhIjp7ImlkIjo0fSwiZXhwIjoxNTQzNjA1ODY5fQ.pr8t3BjjIXttgRXSZWGcrN8iFpxPmVzD-6E1JIry44I';
+    let mGetURL = this.state.getURL;
 
-    //this.loadCoursesForTeacher(authTokenArgerich);
-    //this.loadCoursesForTeacher(authTokenFontela);
+    if (this.props.childProps.role === "Admin") {
+      const setDepartments = (mDepartments, mGetURL) => this.setState({ departmentList: mDepartments, getURL: mGetURL });
+      const errorToastr = message => this.displayErrorToastr(message);
 
-    this.loadCourses();
+      await axios({
+        method:'get',
+        url: API_URI + '/departments',
+        headers: {'Authorization': this.props.childProps.token}
+        })
+          .then(function(response) {
+            console.log(response);
+
+            let mDepartments = [];
+
+            if (response.data.length > 0) {
+              mGetURL = "/departments/" + response.data[0].id + "/subjects"
+            }
+
+            response.data.forEach(department => {
+              mDepartments.push({
+                label: department.name,
+                value: department.id
+              });
+            });
+
+            setDepartments(mDepartments, mGetURL);
+          })
+          .catch(function (error) {
+            console.log(error);
+            errorToastr("No se pudieron cargar los datos.");
+          });
+    }
+
+    this.loadCourses(mGetURL);
 
   }
 
-  async loadCourses() {
+  async loadCourses(newURL) {
     const errorToastr = message => this.displayErrorToastr(message);
     const setLoaderMsg = mLoaderMsg => this.setState({ loaderMsg: mLoaderMsg });
     const setCourses = mCourses => this.setState({courses: mCourses});
     const getPositionMappings = () => this.positions;
+    const getRole = () => this.props.childProps.role;
+    
+    const mURL = API_URI + newURL;
+
+    console.log(mURL);
 
     await axios({
       method:'get',
-      url: API_URI + '/departments/me/courses',
+      url: mURL,
       headers: {'Authorization': this.props.childProps.token}
       })
         .then(function(response) {
@@ -132,12 +168,20 @@ export default class DepartmentCoursesTable extends Component {
             })
           });
 
+          if (mCourses.length === 0) {
+            setLoaderMsg("No hay datos disponibles.");
+          }
+
           setCourses(mCourses);
         })
         .catch(function (error) {
           console.log(error);
-          errorToastr("No se pudieron cargar los datos.");
-          setLoaderMsg("No se pudieron cargar los datos.");
+          if (getRole() === "Admin") {
+            setLoaderMsg("Elija un departamento para cargar los datos.");
+          } else {
+            errorToastr("No se pudieron cargar los datos.");
+            setLoaderMsg("No se pudieron cargar los datos.");
+          }
         });
   }
 
@@ -251,6 +295,12 @@ export default class DepartmentCoursesTable extends Component {
     console.log(teacherName);
   }
 
+  handleDepartmentChange(e) {
+    this.setState({getURL: "/departments/" + e.value + "/subjects"});
+
+    this.loadCourses("/departments/" + e.value + "/subjects");
+  }
+
   render() {
     if (this.state.redirect) {
       return <Redirect push to={`${this.state.redirectTo}`} />;
@@ -348,6 +398,19 @@ export default class DepartmentCoursesTable extends Component {
             <div className="flex-parent">
                 <h1 className="table-title">Cursos</h1>
 
+                {this.props.childProps.role === 'Admin'
+                  ? <Select
+                      className="department-select"
+                      classNamePrefix="select"
+                      placeholder="Seleccione un departamento..."
+                      noOptionsMessage={() => "No hay opciones."}
+                      onChange={this.handleDepartmentChange}
+                      name="name"
+                      options={this.state.departmentList}
+                    />
+                  : <div/>
+                }
+                
                 <Button className="out-table-button" bsStyle="success" onClick={this.handleNewCourseClick}>
                     <Glyphicon glyph="plus" /> Nuevo Curso
                 </Button>

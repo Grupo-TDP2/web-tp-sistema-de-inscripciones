@@ -14,7 +14,8 @@ export default class DepartmentCourses extends Component {
   render() {
     const childProps = {
       token: this.props.token,
-      handleLogout: this.props.handleLogout
+      handleLogout: this.props.handleLogout,
+      role: this.props.role
     };
 
     return (
