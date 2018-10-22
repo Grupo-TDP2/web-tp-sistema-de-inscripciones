@@ -35,7 +35,8 @@ export default class DepartmentCoursesTable extends Component {
         showTeachersModal: false,
         teachersModalProps: null,
         getURL: "/departments/me/courses",
-        departmentList: []
+        departmentList: [],
+        department: ""
     };
 
     this.displayErrorToastr = this.displayErrorToastr.bind(this);
@@ -54,7 +55,7 @@ export default class DepartmentCoursesTable extends Component {
     let mGetURL = this.state.getURL;
 
     if (this.props.childProps.role === "Admin") {
-      const setDepartments = (mDepartments, mGetURL) => this.setState({ departmentList: mDepartments, getURL: mGetURL });
+      const setDepartments = (mDepartments, mGetURL, mDepartmentID) => this.setState({ departmentList: mDepartments, getURL: mGetURL, department: mDepartmentID });
       const errorToastr = message => this.displayErrorToastr(message);
 
       await axios({
@@ -66,9 +67,11 @@ export default class DepartmentCoursesTable extends Component {
             console.log(response);
 
             let mDepartments = [];
+            let mDepartmentID;
 
             if (response.data.length > 0) {
-              mGetURL = "/departments/" + response.data[0].id + "/subjects"
+              mGetURL = "/departments/" + response.data[0].id + "/subjects";
+              mDepartmentID = response.data[0].id;
             }
 
             response.data.forEach(department => {
@@ -78,7 +81,7 @@ export default class DepartmentCoursesTable extends Component {
               });
             });
 
-            setDepartments(mDepartments, mGetURL);
+            setDepartments(mDepartments, mGetURL, mDepartmentID);
           })
           .catch(function (error) {
             console.log(error);
@@ -109,9 +112,7 @@ export default class DepartmentCoursesTable extends Component {
         .then(function(response) {
           console.log(response);
 
-          if (response.data.length === 0) {
-            setLoaderMsg("No hay datos disponibles.");
-          }
+          setLoaderMsg("No hay datos disponibles.");
 
           let mCourses = [];
     
@@ -165,9 +166,7 @@ export default class DepartmentCoursesTable extends Component {
             })
           });
 
-          if (mCourses.length === 0) {
-            setLoaderMsg("No hay datos disponibles.");
-          }
+          setLoaderMsg("No hay datos disponibles.");
 
           setCourses(mCourses);
         })
@@ -190,7 +189,7 @@ export default class DepartmentCoursesTable extends Component {
 
   async handleDeleteClick(cell, row) {
     const errorToastr = message => this.displayErrorToastr(message);
-    const loadCourses = () => this.loadCourses();
+    const loadCourses = () => this.loadCourses(this.state.getURL);
 
     await axios({
       method:'delete',
@@ -210,8 +209,16 @@ export default class DepartmentCoursesTable extends Component {
 
   async addNewCourse(course) {
     const errorToastr = message => this.displayErrorToastr(message);
-    const loadCourses = () => this.loadCourses();
+    const loadCourses = () => this.loadCourses(this.state.getURL);
     const closeCourseModal = () => this.setState({ showCourseModal: false });
+
+    let mDepartmentID;
+
+    if (this.props.childProps.role === "Admin") {
+      mDepartmentID = this.state.department;
+    } else {
+      mDepartmentID = "me";
+    }
 
     await axios({
       method:'post',
@@ -223,7 +230,7 @@ export default class DepartmentCoursesTable extends Component {
         lesson_schedules: course.lesson_schedules,
         teacher_courses: course.teacher_courses
       },
-      url: API_URI + "/departments/me/courses",
+      url: API_URI + "/departments/" + mDepartmentID + "/courses",
       headers: {'Authorization': this.props.childProps.token}
       })
         .then(function(response) {
@@ -247,7 +254,9 @@ export default class DepartmentCoursesTable extends Component {
             handleClose: this.handleCourseModalClose,
             addNewCourse: this.addNewCourse,
             displayErrorToastr: this.displayErrorToastr,
-            token: this.props.childProps.token
+            token: this.props.childProps.token,
+            role: this.props.childProps.role,
+            departmentID: this.state.department
         } 
     });
   }
@@ -268,13 +277,23 @@ export default class DepartmentCoursesTable extends Component {
             teachers: row.teachers,
             displayErrorToastr: this.displayErrorToastr,
             courseInfo: row,
-            token: this.props.childProps.token
+            token: this.props.childProps.token,
+            role: this.props.childProps.role,
+            departmentID: this.state.department
         } 
     });
   }
 
   async handleAddTeacher(teacher, courseID, subjectID) {
     const errorToastr = message => this.displayErrorToastr(message);
+
+    let mURL;
+
+    if (this.props.childProps.role === "Admin") {
+      mURL = "/departments/" + this.state.department + "/courses/" + courseID + "/teachers";
+    } else {
+      mURL = "/departments/me/subjects/" + subjectID + "/courses/" + courseID + "/teachers";
+    }
 
     const teacherCourse = {
       teacher_id: teacher.id,
@@ -288,7 +307,7 @@ export default class DepartmentCoursesTable extends Component {
       data: {
           teacher_course: teacherCourse
       },
-      url: API_URI + "/departments/me/subjects/" + subjectID + "/courses/" + courseID + "/teachers",
+      url: API_URI + mURL,
       headers: {'Authorization': this.props.childProps.token}
       })
         .then(function(response) {
@@ -315,7 +334,7 @@ export default class DepartmentCoursesTable extends Component {
   }
 
   handleDepartmentChange(e) {
-    this.setState({getURL: "/departments/" + e.value + "/subjects"});
+    this.setState({getURL: "/departments/" + e.value + "/subjects", department: e.value});
 
     this.loadCourses("/departments/" + e.value + "/subjects");
   }

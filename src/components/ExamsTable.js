@@ -116,17 +116,23 @@ export default class ExamsTable extends Component {
     const setLoaderMsg = mLoaderMsg => this.setState({ loaderMsg: mLoaderMsg });
     const setExams = mExams => this.setState({exams: mExams});
 
+    let mURL;
+
+    if (this.props.childProps.role === "Admin") {
+      mURL = "/departments/" + this.props.childProps.departmentID + "/courses/" + this.props.childProps.courseID + "/exams";
+    } else {
+      mURL = '/teachers/me/courses/' + this.props.childProps.courseID + '/exams';
+    }
+
     await axios({
       method:'get',
-      url: API_URI + '/teachers/me/courses/' + this.props.childProps.courseID + '/exams',
+      url: API_URI + mURL,
       headers: {'Authorization': this.props.childProps.token}
       })
         .then(function(response) {
           //console.log(response);
 
-          if (response.data.length === 0) {
-            setLoaderMsg("No hay datos disponibles.");
-          }
+          setLoaderMsg("No hay datos disponibles.");
           
           let mExams = [];
 
@@ -197,9 +203,17 @@ export default class ExamsTable extends Component {
   async handleDeleteClick(cell, row) {
     const errorToastr = message => this.displayErrorToastr(message);
 
+    let mURL;
+
+    if (this.props.childProps.role === "Admin") {
+      mURL = "/departments/" + this.props.childProps.departmentID + "/courses/" + this.props.childProps.courseID + "/exams/" + row.examID;
+    } else {
+      mURL = '/teachers/me/courses/' + this.props.childProps.courseID + '/exams/' + row.examID;
+    }
+
     await axios({
       method:'delete',
-      url: API_URI + "/teachers/me/courses/" + this.props.childProps.courseID + "/exams/" + row.examID,
+      url: API_URI + mURL,
       headers: {'Authorization': this.props.childProps.token}
       })
         .then(function(response) {
@@ -222,6 +236,14 @@ export default class ExamsTable extends Component {
       final_exam_week_id: this.state.newExamWeekID,
       date_time: this.state.newDate.format('YYYY-MM-DD') + " " + this.state.newHour
     };
+
+    let mURL;
+
+    if (this.props.childProps.role === "Admin") {
+      mURL = "/departments/" + this.props.childProps.departmentID + "/courses/" + this.props.childProps.courseID + "/exams";
+    } else {
+      mURL = '/teachers/me/courses/' + this.props.childProps.courseID + '/exams';
+    }
 
     await axios({
       method:'post',
@@ -272,8 +294,6 @@ export default class ExamsTable extends Component {
     ]
 
     const hoursList = [
-        {value: "7:00", label: '7:00', day: ["Week","Saturday"]},
-        {value: "7:30", label: '7:30', day: ["Week","Saturday"]},
         {value: "8:00", label: '8:00', day: ["Week","Saturday"]},
         {value: "8:30", label: '8:30', day: ["Week","Saturday"]},
         {value: "9:00", label: '9:00', day: ["Week","Saturday"]},
@@ -299,8 +319,7 @@ export default class ExamsTable extends Component {
         {value: "19:00", label: '19:00', day: ["Week"]},
         {value: "19:30", label: '19:30', day: ["Week"]},
         {value: "20:00", label: '20:00', day: ["Week"]},
-        {value: "20:30", label: '20:30', day: ["Week"]},
-        {value: "21:00", label: '21:00', day: ["Week"]}
+        {value: "20:30", label: '20:30', day: ["Week"]}
     ];
 
     const filteredClassrooms = this.state.availableClassrooms.filter((classroom) => classroom.link === this.state.newBuilding );

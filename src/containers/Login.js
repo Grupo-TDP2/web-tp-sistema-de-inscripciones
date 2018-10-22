@@ -69,7 +69,7 @@ export default class Login extends Component {
         })
         .catch(function (error) {
           setIsLoadingFlag(false);
-          errorToastr("Hubo un error al iniciar sesion. Intente nuevamente.");
+          errorToastr("Email o contraseña invalida. Intente nuevamente.");
           console.log(error);
         });
     } catch (e) {

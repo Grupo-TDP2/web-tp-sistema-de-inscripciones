@@ -115,12 +115,20 @@ export default class StudentsTable extends Component {
       partial_qualification: grade
     };
 
+    let mURL;
+
+    if (this.props.childProps.role === "Admin") {
+      mURL = "/departments/" + this.props.childProps.departmentID + "/courses/" + this.props.childProps.courseID + "/enrolments/" + studentID;
+    } else {
+      mURL = "/teachers/me/courses/" + this.props.childProps.courseID + "/enrolments/" + studentID;
+    }
+
     await axios({
       method:'put',
       data: {
           enrolment: mEnrolment
       },
-      url: API_URI + "/teachers/me/courses/" + this.props.childProps.courseID + "/enrolments/" + studentID,
+      url: API_URI + mURL,
       headers: {'Authorization': this.props.childProps.token}
       })
         .then(function(response) {
@@ -152,6 +160,14 @@ export default class StudentsTable extends Component {
         partial_qualification: null
       };
 
+      let mURL;
+
+      if (this.props.childProps.role === "Admin") {
+        mURL = "/departments/" + this.props.childProps.departmentID + "/courses/" + this.props.childProps.courseID + "/enrolments/" + row.studentID;
+      } else {
+        mURL = "/teachers/me/courses/" + this.props.childProps.courseID + "/enrolments/" + row.studentID;
+      }
+
       if (e === 2) {
         mEnrolment.status = "disapproved";
       } else {
@@ -163,7 +179,7 @@ export default class StudentsTable extends Component {
         data: {
             enrolment: mEnrolment
         },
-        url: API_URI + "/teachers/me/courses/" + this.props.childProps.courseID + "/enrolments/" + row.studentID,
+        url: API_URI + mURL,
         headers: {'Authorization': this.props.childProps.token}
         })
           .then(function(response) {

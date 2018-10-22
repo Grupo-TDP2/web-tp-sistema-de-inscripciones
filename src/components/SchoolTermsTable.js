@@ -59,9 +59,7 @@ export default class SchoolTermsTable extends Component {
         .then(function(response) {
           console.log(response);
 
-          if (response.data.length === 0) {
-            setLoaderMsg("No hay datos disponibles.");
-          }
+          setLoaderMsg("No hay datos disponibles.");
 
           let mSchoolTerms = [];
 
@@ -216,7 +214,9 @@ export default class SchoolTermsTable extends Component {
         }, {
           text: 'Todos', value: this.state.schoolTerms.length
         } ], // you can change the dropdown list for size per page
-        sizePerPage: 10
+        sizePerPage: 10,
+        defaultSortName: 'date_start',  // default sort column name
+        defaultSortOrder: 'desc'  // default sort order
     };
 
     function buttonFormatter(cell, row){
@@ -303,11 +303,11 @@ export default class SchoolTermsTable extends Component {
 
         <BootstrapTable ref='schoolTermsTable' data={ this.state.schoolTerms } options={ options }
                     headerStyle={ { background: '#f8f8f8' } } pagination={ true } search={ true } searchPlaceholder={'Buscar'}>
-            <TableHeaderColumn dataField='id' hidden={ true }>ID</TableHeaderColumn>
-            <TableHeaderColumn dataField='term' width='250' isKey={ true } headerAlign='center' dataAlign='center'>Cuatrimestre</TableHeaderColumn>
+            <TableHeaderColumn dataField='id' isKey={ true } hidden={ true }>ID</TableHeaderColumn>
+            <TableHeaderColumn dataField='term' width='250' headerAlign='center' dataAlign='center'>Cuatrimestre</TableHeaderColumn>
             <TableHeaderColumn dataField='year' width='130' headerAlign='center' dataAlign='center'>Año</TableHeaderColumn>
-            <TableHeaderColumn dataField='date_end' headerAlign='center' dataAlign='center' tdStyle={ { whiteSpace: 'normal' } }>Fecha de inicio</TableHeaderColumn>
-            <TableHeaderColumn dataField='date_start' headerAlign='center' dataAlign='center' tdStyle={ { whiteSpace: 'normal' } }>Fecha de finalización</TableHeaderColumn>
+            <TableHeaderColumn dataField='date_start' headerAlign='center' dataAlign='center' tdStyle={ { whiteSpace: 'normal' } }>Fecha de inicio</TableHeaderColumn>
+            <TableHeaderColumn dataField='date_end' headerAlign='center' dataAlign='center' tdStyle={ { whiteSpace: 'normal' } }>Fecha de finalización</TableHeaderColumn>
             <TableHeaderColumn dataField="button" width='100' headerAlign='center' dataAlign='center' dataFormat={buttonFormatter}>Acciones</TableHeaderColumn>
         </BootstrapTable>
       </div>

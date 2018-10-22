@@ -77,16 +77,24 @@ export default class CourseInfoModal extends Component {
     }
 
     async componentDidMount() {
-        const errorToastr = message => this.displayErrorToastr(message);
+        const errorToastr = message => this.props.childProps.displayErrorToastr(message);
         const setLoaderMsg = mLoaderMsg => this.setState({ loaderMsg: mLoaderMsg });
         const setSchoolTerms = mSchoolTerms => this.setState({ schoolTermList: mSchoolTerms });
         const setSubjects = mSubjects => this.setState({ subjectList: mSubjects });
         const setTeachers = mTeachers => this.setState({ teacherList: mTeachers });
         const setClassrooms = mClassrooms => this.setState({ classroomList: mClassrooms });
 
+        let mURL;
+
+        if (this.props.childProps.role === "Admin") {
+            mURL = "/departments/" + this.props.childProps.departmentID + "/subjects"
+        } else {
+            mURL = '/departments/me/courses';
+        }
+
         await axios({
             method:'get',
-            url: API_URI + '/departments/me/courses',
+            url: API_URI + mURL,
             headers: {'Authorization': this.props.childProps.token}
             })
               .then(function(response) {
@@ -268,7 +276,9 @@ export default class CourseInfoModal extends Component {
     }
 
     handleSubmitNewTeacher() {
-        if (this.state.currentTeachers.every(teacher => teacher.id !== this.state.addTeacherID)) {
+        if (this.state.currentTeachers.every(teacher => teacher.id !== this.state.addTeacherID) &&
+            this.state.currentTeachers.every(teacher => 
+                    (teacher.position !== this.state.addTeacherPosition || ["first_assistant", "second_assistant", "ad_honorem"].includes(this.state.addTeacherPosition)))) {
             let mCurrentTeachers = this.state.currentTeachers;
             mCurrentTeachers.push({
                 id: this.state.addTeacherID,
@@ -278,6 +288,8 @@ export default class CourseInfoModal extends Component {
                 positionMapped: this.positionMappings[this.state.addTeacherPosition]
             });
             this.setState({currentTeachers: mCurrentTeachers});
+          } else if (this.state.currentTeachers.every(teacher => teacher.id !== this.state.addTeacherID)) {
+            this.props.childProps.displayErrorToastr("Ya existe un docente con esa posición.");
           } else {
             this.props.childProps.displayErrorToastr("El docente ya esta asociado con este curso.");
           }

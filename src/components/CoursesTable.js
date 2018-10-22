@@ -7,6 +7,7 @@ import { ToastContainer } from "react-toastr";
 import "./Toastr.css";
 import "./CoursesTable.css";
 import API_URI from "../config/GeneralConfig.js";
+import Select from 'react-select';
 
 let container;
 
@@ -20,7 +21,9 @@ export default class CoursesTable extends Component {
         loaderMsg: 'Cargando la informacion...',
         redirect: false,
         redirectTo: '',
-        toggles: []
+        toggles: [],
+        teacherList: [],
+        teacherID: ""
     };
 
     this.customTitle = this.customTitle.bind(this);
@@ -29,24 +32,67 @@ export default class CoursesTable extends Component {
     this.handleStudentsClick = this.handleStudentsClick.bind(this);
     this.handleExamsClick = this.handleExamsClick.bind(this);
     this.handleAcceptFreeClick = this.handleAcceptFreeClick.bind(this);
+    this.handleTeacherChange = this.handleTeacherChange.bind(this);
+    this.loadCourses = this.loadCourses.bind(this);
   }
 
   async componentDidMount() {
+    let mTeacherID = "me";
+
     const errorToastr = message => this.displayErrorToastr(message);
     const setLoaderMsg = mLoaderMsg => this.setState({ loaderMsg: mLoaderMsg });
     const setCourses = mCourses => this.setState({courses: mCourses});
 
+    if (this.props.childProps.role === "Admin") {
+      const setTeachers = (mTeachers, mTeacherID) => this.setState({ teacherList: mTeachers, teacherID: mTeacherID });
+      const errorToastr = message => this.displayErrorToastr(message);
+
+      await axios({
+          method:'get',
+          url: API_URI + '/teachers',
+          headers: {'Authorization': this.props.childProps.token}
+          })
+            .then(function(response) {
+              console.log(response);
+
+              let mTeachers = [];
+
+              if (response.data.length > 0) {
+                mTeacherID = response.data[0].id;
+              }
+
+              response.data.forEach(teacher => {
+                mTeachers.push({
+                  label: teacher.first_name + " " + teacher.last_name,
+                  value: teacher.id
+                });
+              });
+
+              setTeachers(mTeachers, mTeacherID);
+            })
+            .catch(function (error) {
+              console.log(error);
+              errorToastr("No se pudieron cargar los datos.");
+            });
+      }
+
+    this.loadCourses(mTeacherID);
+  }
+
+  async loadCourses(mTeacherID) {
+    const errorToastr = message => this.displayErrorToastr(message);
+    const setLoaderMsg = mLoaderMsg => this.setState({ loaderMsg: mLoaderMsg });
+    const setCourses = mCourses => this.setState({courses: mCourses});
+    
     await axios({
       method:'get',
-      url: API_URI + '/teachers/me/courses',
+      url: API_URI + '/teachers/' + mTeacherID + '/courses',
       headers: {'Authorization': this.props.childProps.token}
       })
         .then(function(response) {
           console.log(response);
 
-          if (response.data.length === 0) {
-            setLoaderMsg("No hay datos disponibles.");
-          }
+          setLoaderMsg("No hay datos disponibles.");
 
           let mCourses = [];
     
@@ -54,7 +100,8 @@ export default class CoursesTable extends Component {
             let mCourse = {
               id: course.id,
               courseID: course.name,
-              subject: course.subject.name
+              subject: course.subject.name,
+              department: course.subject.department.id
             }
 
             if (course.accept_free_condition_exam === true) {
@@ -117,15 +164,21 @@ export default class CoursesTable extends Component {
   handleStudentsClick(cell, row) {
     this.setState({
       redirect: true,
-      redirectTo: '/courseStudents/' + row.id + '/' + row.subject
+      redirectTo: '/courseStudents/' + row.id + '/' + row.subject + '/' + row.department
     });
   }
 
   handleExamsClick(cell, row) {
     this.setState({
       redirect: true,
-      redirectTo: '/courseExams/' + row.id + '/' + row.subject
+      redirectTo: '/courseExams/' + row.id + '/' + row.subject + '/' + row.department
     });
+  }
+
+  handleTeacherChange(e) {
+    this.setState({ teacherID: e.value });
+
+    this.loadCourses(e.value);
   }
 
   async handleAcceptFreeClick(e, row) {
@@ -142,6 +195,14 @@ export default class CoursesTable extends Component {
       mAcceptFree = false;
     }
 
+    let mURL;
+
+    if (this.props.childProps.role === "Admin") {
+      mURL = "/departments/" + row.department + "/courses/" + row.id;
+    } else {
+      mURL = '/teachers/me/courses/' + row.id;
+    }
+
     await axios({
       method:'patch',
       data: {
@@ -149,7 +210,7 @@ export default class CoursesTable extends Component {
           accept_free_condition_exam: mAcceptFree
         }
       },
-      url: API_URI + '/teachers/me/courses/' + row.id,
+      url: API_URI + mURL,
       headers: {'Authorization': this.props.childProps.token}
       })
         .then(function(response) {
@@ -218,6 +279,22 @@ export default class CoursesTable extends Component {
 
     return (
       <div>
+        <div className="flexParent">
+          <h1>Cursos</h1>
+
+          {this.props.childProps.role === 'Admin'
+            ? <Select
+                className="departmentSelect"
+                classNamePrefix="select"
+                placeholder="Seleccione un docente..."
+                noOptionsMessage={() => "No hay opciones."}
+                onChange={this.handleTeacherChange}
+                name="name"
+                options={this.state.teacherList}
+              />
+            : <div/>
+          }
+        </div>
         <ToastContainer
           ref={ref => container = ref}
           className="toast-top-right"
@@ -233,6 +310,7 @@ export default class CoursesTable extends Component {
             <TableHeaderColumn dataField="students" width='100' headerAlign='center' dataAlign='center' dataFormat={studentsButtonFormatter}>Alumnos</TableHeaderColumn>
             <TableHeaderColumn dataField="exams" width='100' headerAlign='center' dataAlign='center' dataFormat={examsButtonFormatter}>Exámenes</TableHeaderColumn>
             <TableHeaderColumn dataField="acceptFree" width='100' headerAlign='center' dataAlign='center' dataFormat={(cell, row) => freeCheckboxFormatter(cell, row)}>Libres</TableHeaderColumn>
+            <TableHeaderColumn dataField='department' hidden={ true }>Departamento</TableHeaderColumn>
         </BootstrapTable>
       </div>
     );

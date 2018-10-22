@@ -14,13 +14,13 @@ export default class TeacherCourses extends Component {
   render() {
     const childProps = {
       token: this.props.token,
-      handleLogout: this.props.handleLogout
+      handleLogout: this.props.handleLogout,
+      role: this.props.role
     };
 
     return (
       this.props.isAuthenticated &&
       <div>
-        <h1>Mis Cursos</h1>
         <CoursesTable childProps={childProps}/>
       </div>
     );
