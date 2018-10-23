@@ -1,0 +1,60 @@
+.flexParent {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.tableTitle {
+    margin-top: auto;
+    margin-bottom: auto;
+    align-self: center;
+}
+
+.outTableButton {
+    margin-bottom: 5px;
+    margin-right: 5px;
+    height: 30px;
+    font-size: 12px;
+    align-self: center;
+    margin-top: auto;
+    margin-bottom: auto;
+}
+
+.goBackBtn {
+    float: right;
+    margin-top: 20px;
+}
+
+.addExamFlex {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.addExamColumnFlex {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.examsSelect {
+    width: 300px;
+}
+
+.datepicker {
+    height: 36px;
+    width: 100%;
+}
+
+.addDateRow {
+    margin-top: 20px;
+    margin-bottom: 15px;
+}
+
+.addDateButtonContainer {
+    padding-top: 20px;
+    padding-bottom: 20px;
+    padding-left: 20px;
+    padding-right: 10px;
+}

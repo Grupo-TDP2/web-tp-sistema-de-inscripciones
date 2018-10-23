@@ -1,0 +1,37 @@
+.goBackBtn {
+    float: right;
+    margin-top: 20px;
+}
+
+.addExamFlex {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.addExamColumnFlex {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.examsSelect {
+    width: 300px;
+}
+
+.datepicker {
+    height: 36px;
+    width: 100%;
+}
+
+.addDateRow {
+    margin-top: 20px;
+    margin-bottom: 15px;
+}
+
+.addDateButtonContainer {
+    padding-top: 20px;
+    padding-bottom: 20px;
+    padding-left: 20px;
+    padding-right: 10px;
+}

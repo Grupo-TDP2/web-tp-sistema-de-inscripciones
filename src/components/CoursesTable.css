@@ -2,3 +2,14 @@
     margin-bottom: 5px;
     margin-right: 5px;
 }
+
+.flexParent {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.departmentSelect {
+    align-self: center;
+    width: 300px;
+}

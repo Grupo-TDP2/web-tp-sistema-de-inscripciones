@@ -15,7 +15,9 @@ export default class CourseStudents extends Component {
     const childProps = {
       token: this.props.token,
       handleLogout: this.props.handleLogout,
-      courseID: this.props.match.params.courseID
+      courseID: this.props.match.params.courseID,
+      departmentID: this.props.match.params.departmentID,
+      role: this.props.role
     };
 
     return (

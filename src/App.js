@@ -71,7 +71,7 @@ class App extends Component {
           </Navbar.Header>
           <Navbar.Collapse>
             <Nav pullLeft>
-            {this.state.isAuthenticated && this.state.role === 'docente'
+            {this.state.isAuthenticated && this.state.role === 'Teacher'
               ? <Fragment>
                   <LinkContainer to="/teacherCourses" activeClassName="">
                     <NavItem>Mis Cursos</NavItem>
@@ -79,10 +79,24 @@ class App extends Component {
                 </Fragment>
               : <Fragment/>
             }
-            {this.state.isAuthenticated && this.state.role === 'departamento'
+            {this.state.isAuthenticated && this.state.role === 'DepartmentStaff'
               ? <Fragment>
                   <LinkContainer to="/departmentCourses" activeClassName="">
                     <NavItem>Cursos</NavItem>
+                  </LinkContainer>
+                </Fragment>
+              : <Fragment/>
+            }
+            {this.state.isAuthenticated && this.state.role === 'Admin'
+              ? <Fragment>
+                  <LinkContainer to="/schoolTerms" activeClassName="">
+                    <NavItem>Períodos Lectivos</NavItem>
+                  </LinkContainer>
+                  <LinkContainer to="/teacherCourses" activeClassName="">
+                    <NavItem>Cursos - Docente</NavItem>
+                  </LinkContainer>
+                  <LinkContainer to="/departmentCourses" activeClassName="">
+                    <NavItem>Cursos - Departamento</NavItem>
                   </LinkContainer>
                 </Fragment>
               : <Fragment/>

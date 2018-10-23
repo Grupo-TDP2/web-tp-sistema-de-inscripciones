@@ -1,6 +1,6 @@
 .formControl {
-    margin-right: 10px;
-    margin-left: 10px;
+    margin-right: 15px;
+    margin-left: 15px;
 }
 
 .formGroupFlex {
@@ -26,6 +26,7 @@
     display: flex;
     flex-direction: column;
     align-items: flex-start;
+    margin-top: 10px;
 }
 
 .formGroupHalfItem {
@@ -59,4 +60,58 @@
 
 .noMarginBottom {
     margin-bottom: 0px;
+}
+
+.courseModalSelect {
+    width: 40%;
+}
+
+.courseModalSelectSmall {
+    width: 25%;
+}
+
+.daySelect {
+    width: 225px;
+}
+
+.hourSelect {
+    width: 145px;
+}
+
+.footerFlex {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+}
+
+.footerFlexItem {
+    align-self: center;
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+.selectMargin {
+    margin-right: 10px;
+}
+
+@media (min-width: 900px) {
+    .teacherFlexMarginLeft {
+        margin-left: 10px; 
+    }
+    
+    .tableMargin {
+        margin-right: 20px;
+        margin-left: 20px;
+    }
+}
+
+.subFlex {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    width: 100%;
+}
+
+.marginLeft {
+    margin-left: 10px;
 }

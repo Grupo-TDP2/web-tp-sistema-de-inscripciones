@@ -1,7 +1,7 @@
 import React, { Component } from "react";
-import CoursesTable from "../components/CoursesTable"
+import SchoolTermsTable from "../components/SchoolTermsTable"
 
-export default class TeacherCourses extends Component {
+export default class SchoolTerms extends Component {
 
   constructor(props) {
     super(props);
@@ -14,14 +14,14 @@ export default class TeacherCourses extends Component {
   render() {
     const childProps = {
       token: this.props.token,
-      handleLogout: this.props.handleLogout,
-      role: this.props.role
+      handleLogout: this.props.handleLogout
     };
 
     return (
       this.props.isAuthenticated &&
       <div>
-        <CoursesTable childProps={childProps}/>
+        <h1>Períodos Lectivos</h1>
+        <SchoolTermsTable childProps={childProps}/>
       </div>
     );
   }

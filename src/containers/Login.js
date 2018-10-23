@@ -4,6 +4,7 @@ import LoaderButton from "../components/LoaderButton";
 import "./Login.css";
 import axios from 'axios';
 import { ToastContainer } from "react-toastr";
+import API_URI from "../config/GeneralConfig.js";
 import "../components/Toastr.css";
 
 let container;
@@ -14,7 +15,7 @@ export default class Login extends Component {
 
     this.state = {
       isLoading: false,
-      username: "",
+      email: "",
       password: ""
     };
 
@@ -22,7 +23,7 @@ export default class Login extends Component {
   }
 
   validateForm() {
-    return this.state.username.length > 0 && this.state.password.length > 0;
+    return this.state.email.length > 0 && this.state.password.length > 0;
   }
 
   displayErrorToastr(message) {
@@ -47,36 +48,32 @@ export default class Login extends Component {
 
     this.setState({ isLoading: true });
     
-    //ESTO SE USA PARA AUTH
-    /*try {
-      axios.post(AUTH_ENDPOINT, {
-        username: this.state.username,
+    try {
+      axios.post(API_URI + '/sessions', {
+        email: this.state.email,
         password: this.state.password
       })
         .then(function (response) {
           setIsLoadingFlag(false);
-          authFunction(response.data.access_token);
-          goToRoute("/");
+          authFunction(response.data.access_token, response.data.role);
+
+          if (response.data.role === "Teacher") {
+            goToRoute("/teacherCourses");
+          } else if (response.data.role === "DepartmentStaff") {
+            goToRoute("/departmentCourses");
+          } else if (response.data.role === "Admin") {
+            goToRoute("/schoolTerms");
+          } else {
+            goToRoute("/");
+          }
         })
         .catch(function (error) {
           setIsLoadingFlag(false);
-          errorToastr("Hubo un error al iniciar sesion. Intente nuevamente.");
+          errorToastr("Email o contraseña invalida. Intente nuevamente.");
           console.log(error);
         });
     } catch (e) {
       alert(e.message);
-    }*/
-
-    setIsLoadingFlag(false);
-
-    if (this.state.username === "departamento") {
-      authFunction("123", "departamento");
-      goToRoute("/departmentCourses");
-    } else if (this.state.username === "docente") {
-      authFunction("123", "docente");
-      goToRoute("/teacherCourses");
-    } else {
-      errorToastr("Hubo un error al iniciar sesion. Intente nuevamente.");
     }
   }
 
@@ -88,12 +85,12 @@ export default class Login extends Component {
             className="toast-top-right"
           />
         <form onSubmit={this.handleSubmit}>
-          <FormGroup controlId="username" bsSize="large">
-            <ControlLabel>Usuario</ControlLabel>
+          <FormGroup controlId="email" bsSize="large">
+            <ControlLabel>Email</ControlLabel>
             <FormControl
               autoFocus
-              type="username"
-              value={this.state.username}
+              type="email"
+              value={this.state.email}
               onChange={this.handleChange}
             />
           </FormGroup>
