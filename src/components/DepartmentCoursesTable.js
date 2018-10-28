@@ -318,7 +318,7 @@ export default class DepartmentCoursesTable extends Component {
     if (this.props.childProps.role === "Admin") {
       mURL = "/departments/" + this.state.department + "/courses/" + courseID + "/teachers";
     } else {
-      mURL = "/departments/me/subjects/" + subjectID + "/courses/" + courseID + "/teachers";
+      mURL = "/departments/me/courses/" + courseID + "/teachers";
     }
 
     const teacherCourse = {

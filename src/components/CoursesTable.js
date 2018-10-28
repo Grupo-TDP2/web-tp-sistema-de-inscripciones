@@ -7,6 +7,7 @@ import { ToastContainer } from "react-toastr";
 import "./Toastr.css";
 import "./CoursesTable.css";
 import API_URI from "../config/GeneralConfig.js";
+import OptionsToggle from "./OptionsToggle";
 import Select from 'react-select';
 
 let container;
@@ -298,8 +299,18 @@ export default class CoursesTable extends Component {
     }
 
     function freeCheckboxFormatter(cell, row){
+      const childProps = {
+        valueProp: cell,
+        handleChange: handleAcceptFreeClick,
+        row: row,
+        options: [
+          {value: 1, label: "Si"},
+          {value: 2, label: "No"}
+        ]
+      };
+
       return (
-        <AcceptFreeToggle acceptFree={ cell } handleChange={handleAcceptFreeClick} row={ row } />
+        <OptionsToggle childProps={ childProps } />
       );
     }
 
@@ -339,21 +350,6 @@ export default class CoursesTable extends Component {
             <TableHeaderColumn dataField='department' hidden={ true }>Departamento</TableHeaderColumn>
         </BootstrapTable>
       </div>
-    );
-  }
-}
-
-class AcceptFreeToggle extends React.Component {
-  render() {
-    return (
-      <ToggleButtonGroup 
-        type="radio" 
-        name="options"
-        value={this.props.acceptFree}
-        onChange={(e) => this.props.handleChange(e,this.props.row)}>
-          <ToggleButton value={1}>Si</ToggleButton>
-          <ToggleButton value={2}>No</ToggleButton>
-      </ToggleButtonGroup>
     );
   }
 }

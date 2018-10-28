@@ -45,6 +45,7 @@ export default class ExamsTable extends Component {
     this.handleHourChange = this.handleHourChange.bind(this);
     this.addNewExamDate = this.addNewExamDate.bind(this);
     this.loadExamDates = this.loadExamDates.bind(this);
+    this.handleShowExamStudents = this.handleShowExamStudents.bind(this);
   }
 
   async componentDidMount() {
@@ -275,12 +276,23 @@ export default class ExamsTable extends Component {
     });
   }
 
+  handleShowExamStudents(cell, row) {
+    let mDateSplit = row.date.split('/');
+    const mDate = mDateSplit[0] + '-' + mDateSplit[1] + '-' + mDateSplit[2];
+
+    this.setState({
+        redirect: true,
+        redirectTo: '/examStudents/' + this.props.childProps.courseID + '/' + this.props.childProps.subject + '/' + this.props.childProps.departmentID + '/' + mDate + '/' + row.examID
+    });
+  }
+
   render() {
     if (this.state.redirect) {
       return <Redirect push to={`${this.state.redirectTo}`} />;
     }
 
     const handleDeleteClick = (cell,row) => this.handleDeleteClick(cell,row);
+    const handleShowExamStudents = (cell,row) => this.handleShowExamStudents(cell,row);
 
     const availableBuildings = [
       {
@@ -349,6 +361,14 @@ export default class ExamsTable extends Component {
       return (
         <Button className="submitButton" bsStyle="danger" onClick={() => handleDeleteClick(cell,row)}>
             <Glyphicon glyph="trash" />&nbsp;
+        </Button>
+      );
+    }
+
+    function studentsBtnFormatter(cell, row){
+      return (
+        <Button className="submitButton" onClick={() => handleShowExamStudents(cell,row)}>
+            <Glyphicon glyph="education" />&nbsp;
         </Button>
       );
     }
@@ -447,7 +467,8 @@ export default class ExamsTable extends Component {
             <TableHeaderColumn dataField='building' width='160' headerAlign='center' dataAlign='center'>Sede</TableHeaderColumn>
             <TableHeaderColumn dataField='classroom' width='160' headerAlign='center' dataAlign='center'>Aula</TableHeaderColumn>
             <TableHeaderColumn dataField="free" width='140' headerAlign='center' dataAlign='center'>Libres</TableHeaderColumn>
-            <TableHeaderColumn dataField="button" width='140' headerAlign='center' dataAlign='center' dataFormat={buttonFormatter}></TableHeaderColumn>
+            <TableHeaderColumn dataField="students" width='140' headerAlign='center' dataAlign='center' dataFormat={studentsBtnFormatter}>Alumnos</TableHeaderColumn>
+            <TableHeaderColumn dataField="button" width='140' headerAlign='center' dataAlign='center' dataFormat={buttonFormatter}>Acciones</TableHeaderColumn>
         </BootstrapTable>
         <Button className="submitButton goBackBtn" onClick={this.handleGoBack}>
             <Glyphicon glyph="chevron-left" /> Volver a Mis Cursos

@@ -7,6 +7,7 @@ import { ToastContainer } from "react-toastr";
 import "./Toastr.css";
 import API_URI from "../config/GeneralConfig.js";
 import SetGradeModal from "./SetGradeModal";
+import OptionsToggle from "./OptionsToggle";
 
 let container;
  
@@ -45,10 +46,6 @@ export default class StudentsTable extends Component {
         .then(function(response) {
           console.log(response);
 
-          if (response.data.length === 0) {
-            setLoaderMsg("No hay datos disponibles.");
-          }
-
           let mStudents = [];
 
           response.data.forEach(student => {
@@ -77,6 +74,7 @@ export default class StudentsTable extends Component {
           });
 
           setStudents(mStudents);
+          setLoaderMsg("No hay datos disponibles.");
         })
         .catch(function (error) {
           console.log(error);
@@ -228,8 +226,19 @@ export default class StudentsTable extends Component {
     }
 
     function approvedCheckboxFormatter(cell, row){
+      const childProps = {
+        valueProp: cell,
+        handleChange: handleChangeApproval,
+        row: row,
+        options: [
+          {value: 1, label: "Si"},
+          {value: 2, label: "No"},
+          {value: 3, label: "En Curso"}
+        ]
+      };
+
       return (
-        <ApprovedToggle approved={ cell } handleChange={handleChangeApproval} row={ row } />
+        <OptionsToggle childProps={ childProps } />
       );
     }
 
@@ -252,22 +261,6 @@ export default class StudentsTable extends Component {
             <TableHeaderColumn dataField='grade' dataSort={ true } width='90' headerAlign='center' dataAlign='center'>Nota</TableHeaderColumn>
         </BootstrapTable>
       </div>
-    );
-  }
-}
-
-class ApprovedToggle extends React.Component {
-  render() {
-    return (
-      <ToggleButtonGroup 
-        type="radio" 
-        name="options"
-        value={this.props.approved}
-        onChange={(e) => this.props.handleChange(e,this.props.row)}>
-          <ToggleButton value={1}>Si</ToggleButton>
-          <ToggleButton value={2}>No</ToggleButton>
-          <ToggleButton value={3}>En Curso</ToggleButton>
-      </ToggleButtonGroup>
     );
   }
 }
