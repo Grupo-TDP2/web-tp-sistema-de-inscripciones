@@ -7,6 +7,7 @@ import { ToastContainer } from "react-toastr";
 import "./Toastr.css";
 import API_URI from "../config/GeneralConfig.js";
 import OptionsToggle from "./OptionsToggle";
+import SetGradeModal from "./SetGradeModal";
 
 let container;
  
@@ -19,11 +20,15 @@ export default class ExamStudentsTable extends Component {
         students: [],
         loaderMsg: 'Cargando la informacion...',
         redirect: false,
-        redirectTo: ''
+        redirectTo: '',
+        setGradeModal: ''
     };
 
     this.displayErrorToastr = this.displayErrorToastr.bind(this);
     this.loadStudents = this.loadStudents.bind(this);
+    this.handleChangeApproval = this.handleChangeApproval.bind(this);
+    this.handleStudentModalClose = this.handleStudentModalClose.bind(this);
+    this.handleSetGrade = this.handleSetGrade.bind(this);
   }
 
   async loadStudents() {
@@ -49,11 +54,20 @@ export default class ExamStudentsTable extends Component {
 
           let mStudents = [];
 
-          response.data.forEach(student => {
+          response.data.forEach(studentExam => {
             let mStudent = {
-              studentID: student.id,
-              name: student.student.last_name + ', ' + student.student.first_name,
-              studentNumber: student.student.school_document_number
+              studentID: studentExam.student.id,
+              name: studentExam.student.last_name + ', ' + studentExam.student.first_name,
+              studentNumber: studentExam.student.school_document_number,
+              schoolTerm: '2º 2018', //Tomar del endpoint
+              approved: 3, //Tomar del endpoint
+              grade: studentExam.qualification
+            }
+
+            if (studentExam.condition === "regular") {
+              mStudent.condition = "Regular";
+            } else {
+              mStudent.condition = "Libre";
             }
 
             /*if (student.status === 'approved') {
@@ -87,10 +101,103 @@ export default class ExamStudentsTable extends Component {
       );
   }
 
+  handleStudentModalClose() {
+    //this.setState({ setGradeModal: '' });
+  }
+
+  async handleSetGrade(grade, studentID) {
+    /*const errorToastr = message => this.displayErrorToastr(message);
+
+    const mEnrolment = {
+      status: "approved",
+      partial_qualification: grade
+    };
+
+    let mURL;
+
+    if (this.props.childProps.role === "Admin") {
+      mURL = "/departments/" + this.props.childProps.departmentID + "/courses/" + this.props.childProps.courseID + "/enrolments/" + studentID;
+    } else {
+      mURL = "/teachers/me/courses/" + this.props.childProps.courseID + "/enrolments/" + studentID;
+    }
+
+    await axios({
+      method:'put',
+      data: {
+          enrolment: mEnrolment
+      },
+      url: API_URI + mURL,
+      headers: {'Authorization': this.props.childProps.token}
+      })
+        .then(function(response) {
+          console.log(response);
+        })
+        .catch(function (error) {
+          console.log(error);
+          errorToastr("No se pudo editar la información del alumno. Intente nuevamente.");
+        });
+
+    this.loadStudents();
+
+    this.setState({ setGradeModal: '' });*/
+  }
+
+  async handleChangeApproval(e, row) {
+    /*if (e === 1) {
+      const modalProps = {
+        handleClose: this.handleStudentModalClose,
+        handleSetGrade: this.handleSetGrade,
+        studentInfo: row
+      }
+
+      this.setState({ setGradeModal: <SetGradeModal modalProps={modalProps}/>});
+    } else {
+      const errorToastr = message => this.displayErrorToastr(message);
+
+      const mEnrolment = {
+        partial_qualification: null
+      };
+
+      let mURL;
+
+      if (this.props.childProps.role === "Admin") {
+        mURL = "/departments/" + this.props.childProps.departmentID + "/courses/" + this.props.childProps.courseID + "/enrolments/" + row.studentID;
+      } else {
+        mURL = "/teachers/me/courses/" + this.props.childProps.courseID + "/enrolments/" + row.studentID;
+      }
+
+      if (e === 2) {
+        mEnrolment.status = "disapproved";
+      } else {
+        mEnrolment.status = "not_evaluated";
+      }
+
+      await axios({
+        method:'put',
+        data: {
+            enrolment: mEnrolment
+        },
+        url: API_URI + mURL,
+        headers: {'Authorization': this.props.childProps.token}
+        })
+          .then(function(response) {
+            console.log(response);
+          })
+          .catch(function (error) {
+            console.log(error);
+            errorToastr("No se pudo editar la información del alumno. Intente nuevamente.");
+          });
+
+      this.loadStudents();
+    }*/
+  }
+
   render() {
     if (this.state.redirect) {
       return <Redirect push to={`${this.state.redirectTo}`} />;
     }
+
+    const handleChangeApproval = (cell,row) => this.handleChangeApproval(cell,row);
 
     const options = {
         noDataText: this.state.loaderMsg,
@@ -109,7 +216,7 @@ export default class ExamStudentsTable extends Component {
         defaultSortOrder: 'asc'  // default sort order
     };
 
-    /*function approvedCheckboxFormatter(cell, row){
+    function approvedCheckboxFormatter(cell, row){
       const childProps = {
         valueProp: cell,
         handleChange: handleChangeApproval,
@@ -117,17 +224,19 @@ export default class ExamStudentsTable extends Component {
         options: [
           {value: 1, label: "Si"},
           {value: 2, label: "No"},
-          {value: 3, label: "En Curso"}
+          {value: 3, label: "No Evaluado"}
         ]
       };
 
       return (
         <OptionsToggle childProps={ childProps } />
       );
-    }*/
+    }
 
     return (
       <div>
+        {this.state.setGradeModal}
+
         <ToastContainer
           ref={ref => container = ref}
           className="toast-top-right"
@@ -137,7 +246,9 @@ export default class ExamStudentsTable extends Component {
             <TableHeaderColumn dataField='studentID' hidden={ true } width='80' isKey={ true } headerAlign='center' dataAlign='center'>ID Alumno</TableHeaderColumn>
             <TableHeaderColumn dataField='name' dataSort={ true } headerAlign='center' dataAlign='center'>Nombre</TableHeaderColumn>
             <TableHeaderColumn dataField='studentNumber' dataSort={ true } width='180' headerAlign='center' dataAlign='center'>Padron</TableHeaderColumn>
-            <TableHeaderColumn dataField='status' width='160' headerAlign='center' dataAlign='center'>Condición</TableHeaderColumn>
+            <TableHeaderColumn dataField='condition' width='160' headerAlign='center' dataAlign='center'>Condición</TableHeaderColumn>
+            <TableHeaderColumn dataField='schoolTerm' width='160' headerAlign='center' dataAlign='center'>Cuatrimestre</TableHeaderColumn>
+            <TableHeaderColumn dataField='approved' width='210' headerAlign='center' dataAlign='center' dataFormat={(cell, row) => approvedCheckboxFormatter(cell, row)}>Aprobado</TableHeaderColumn>
             <TableHeaderColumn dataField='grade' dataSort={ true } width='90' headerAlign='center' dataAlign='center'>Nota</TableHeaderColumn>
         </BootstrapTable>
       </div>
