@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { Redirect } from 'react-router-dom';
-import {BootstrapTable, TableHeaderColumn} from 'react-bootstrap-table';
+import {BootstrapTable, TableHeaderColumn, ExportCSVButton} from 'react-bootstrap-table';
 import axios from 'axios'
 import {Glyphicon, Button} from 'react-bootstrap';
 import { ToastContainer } from "react-toastr";
@@ -24,11 +24,23 @@ export default class ExamStudentsTable extends Component {
         setGradeModal: ''
     };
 
+    this.URL = {
+      "Admin": {
+        students: "/departments/" + this.props.childProps.departmentID + "/courses/" + this.props.childProps.courseID + "/exams/" + this.props.childProps.examID + "/student_exams",
+        export: "/departments/" + this.props.childProps.departmentID + "/courses/" + this.props.childProps.courseID + "/exams/" + this.props.childProps.examID + "/student_exams/csv_format"
+      },
+      "Teacher": {
+        students: "/teachers/me/courses/" + this.props.childProps.courseID + "/exams/" + this.props.childProps.examID + "/student_exams",
+        export: "/teachers/me/courses/" + this.props.childProps.courseID + "/exams/" + this.props.childProps.examID + "/student_exams/csv_format"
+      }
+    }
+
     this.displayErrorToastr = this.displayErrorToastr.bind(this);
     this.loadStudents = this.loadStudents.bind(this);
     this.handleChangeApproval = this.handleChangeApproval.bind(this);
     this.handleStudentModalClose = this.handleStudentModalClose.bind(this);
     this.handleSetGrade = this.handleSetGrade.bind(this);
+    this.exportStudentList = this.exportStudentList.bind(this);
   }
 
   async loadStudents() {
@@ -36,17 +48,9 @@ export default class ExamStudentsTable extends Component {
     const setLoaderMsg = mLoaderMsg => this.setState({ loaderMsg: mLoaderMsg });
     const setStudents = mStudents => this.setState({students: mStudents});
 
-    let mURL;
-
-    if (this.props.childProps.role === "Admin") {
-        mURL = "/teachers/me/courses/" + this.props.childProps.courseID + "/exams/" + this.props.childProps.examID + "/student_exams";
-    } else {
-        mURL = "/departments/" + this.props.childProps.departmentID + "/courses/" + this.props.childProps.courseID + "/exams/" + this.props.childProps.examID + "/student_exams";
-    }
-
     await axios({
       method:'get',
-      url: API_URI + mURL,
+      url: API_URI + this.URL[this.props.childProps.role].students,
       headers: {'Authorization': this.props.childProps.token}
       })
         .then(function(response) {
@@ -89,6 +93,29 @@ export default class ExamStudentsTable extends Component {
           errorToastr("No se pudieron cargar los datos.");
           setLoaderMsg("No se pudieron cargar los datos.");
         });
+  }
+
+  async exportStudentList(e) {
+    e.preventDefault();
+
+    const errorToastr = message => this.displayErrorToastr(message);
+    const setLoaderMsg = mLoaderMsg => this.setState({ loaderMsg: mLoaderMsg });
+
+    /*await axios({
+      method:'get',
+      url: API_URI + this.URL[this.props.childProps.role].export,
+      headers: {'Authorization': this.props.childProps.token}
+      })
+        .then(function(response) {
+          console.log(response);
+        })
+        .catch(function (error) {
+          console.log(error);
+          errorToastr("No se pudieron cargar los datos.");
+          setLoaderMsg("No se pudieron cargar los datos.");
+        });*/
+
+    errorToastr("Función habilitada proximamente.");
   }
 
   async componentDidMount() {
@@ -199,6 +226,16 @@ export default class ExamStudentsTable extends Component {
 
     const handleChangeApproval = (cell,row) => this.handleChangeApproval(cell,row);
 
+    const customCSVBtn = (onClick) => {
+      return (
+        <ExportCSVButton
+          btnText='Exportar Lista'
+          btnContextual='btn-primary'
+          btnGlyphicon='glyphicon-export'
+          onClick={ e => this.exportStudentList(e) }/>
+      );
+    }
+
     const options = {
         noDataText: this.state.loaderMsg,
         beforeShowError: (type, msg) => {
@@ -212,8 +249,9 @@ export default class ExamStudentsTable extends Component {
           text: 'Todos', value: this.state.students.length
         } ], // you can change the dropdown list for size per page
         sizePerPage: 10,
-        defaultSortName: 'studentID',  // default sort column name
-        defaultSortOrder: 'asc'  // default sort order
+        defaultSortName: 'studentID',
+        defaultSortOrder: 'asc',
+        exportCSVBtn: customCSVBtn
     };
 
     function approvedCheckboxFormatter(cell, row){
@@ -241,7 +279,7 @@ export default class ExamStudentsTable extends Component {
           ref={ref => container = ref}
           className="toast-top-right"
         />
-        <BootstrapTable ref='coursesTable' data={ this.state.students } options={ options }
+        <BootstrapTable ref='coursesTable' data={ this.state.students } options={ options } exportCSV={ true }
                     headerStyle={ { background: '#f8f8f8' } } pagination={ true } search={ true } searchPlaceholder={'Buscar'}>
             <TableHeaderColumn dataField='studentID' hidden={ true } width='80' isKey={ true } headerAlign='center' dataAlign='center'>ID Alumno</TableHeaderColumn>
             <TableHeaderColumn dataField='name' dataSort={ true } headerAlign='center' dataAlign='center'>Nombre</TableHeaderColumn>
