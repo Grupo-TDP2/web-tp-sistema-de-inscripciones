@@ -10,6 +10,7 @@ import API_URI from "../config/GeneralConfig.js";
 import CourseInfoModal from "./CourseInfoModal";
 import TeachersModal from "./TeachersModal";
 import Select from 'react-select';
+import ConfirmModal from './ConfirmModal';
 
 let container;
 
@@ -30,6 +31,7 @@ export default class DepartmentCoursesTable extends Component {
         loaderMsg: 'Cargando la informacion...',
         redirect: false,
         redirectTo: '',
+        confirmModal: '',
         showCourseModal: false,
         courseModalProps: null,
         showTeachersModal: false,
@@ -40,6 +42,7 @@ export default class DepartmentCoursesTable extends Component {
     };
 
     this.displayErrorToastr = this.displayErrorToastr.bind(this);
+    this.displaySuccessToastr = this.displaySuccessToastr.bind(this);
     this.handleDeleteClick = this.handleDeleteClick.bind(this);
     this.handleNewCourseClick = this.handleNewCourseClick.bind(this);
     this.handleCourseModalClose = this.handleCourseModalClose.bind(this);
@@ -49,6 +52,7 @@ export default class DepartmentCoursesTable extends Component {
     this.handleAddTeacher = this.handleAddTeacher.bind(this);
     this.loadCourses = this.loadCourses.bind(this);
     this.handleDepartmentChange = this.handleDepartmentChange.bind(this);
+    this.handleModalClose = this.handleModalClose.bind(this);
   }
 
   async componentDidMount() {
@@ -213,8 +217,19 @@ export default class DepartmentCoursesTable extends Component {
       );
   }
 
-  async handleDeleteClick(cell, row) {
+  displaySuccessToastr(message) {
+    container.success(<div></div>, <em>{message}</em>, 
+        {closeButton: true, timeOut: 3000}
+      );
+  }
+
+  handleModalClose() {
+    this.setState({ confirmModal: '' });
+  }
+
+  async handleDelete(row) {
     const errorToastr = message => this.displayErrorToastr(message);
+    const successToastr = message => this.displaySuccessToastr(message);
     const loadCourses = () => this.loadCourses(this.state.getURL);
 
     await axios({
@@ -225,16 +240,33 @@ export default class DepartmentCoursesTable extends Component {
         .then(function(response) {
           console.log(response);
 
+          successToastr("La operación se realizó con exito.");
+
           loadCourses();
         })
         .catch(function (error) {
           console.log(error);
           errorToastr("No se pudo eliminar el curso. Intente nuevamente.");
         });
+
+    this.setState({ confirmModal: '' });
+  }
+
+  handleDeleteClick(cell, row) {
+    const modalProps = {
+      message: 'Estás seguro que deseas eliminar este curso? Esta operación no se puede deshacer.',
+      messageTitle: 'Eliminar Curso?',
+      type: 'confirmDelete',
+      handleClose: this.handleModalClose,
+      handleConfirmAction: () => this.handleDelete(row)
+    };
+
+    this.setState({ confirmModal: <ConfirmModal modalProps={modalProps}/> });
   }
 
   async addNewCourse(course) {
     const errorToastr = message => this.displayErrorToastr(message);
+    const successToastr = message => this.displaySuccessToastr(message);
     const loadCourses = () => this.loadCourses(this.state.getURL);
     const closeCourseModal = () => this.setState({ showCourseModal: false });
 
@@ -261,6 +293,7 @@ export default class DepartmentCoursesTable extends Component {
       })
         .then(function(response) {
           console.log(response);
+          successToastr("La operación se realizó con exito.");
 
           closeCourseModal();
 
@@ -312,13 +345,14 @@ export default class DepartmentCoursesTable extends Component {
 
   async handleAddTeacher(teacher, courseID, subjectID) {
     const errorToastr = message => this.displayErrorToastr(message);
+    const successToastr = message => this.displaySuccessToastr(message);
 
     let mURL;
 
     if (this.props.childProps.role === "Admin") {
       mURL = "/departments/" + this.state.department + "/courses/" + courseID + "/teachers";
     } else {
-      mURL = "/departments/me/subjects/" + subjectID + "/courses/" + courseID + "/teachers";
+      mURL = "/departments/me/courses/" + courseID + "/teachers";
     }
 
     const teacherCourse = {
@@ -338,6 +372,7 @@ export default class DepartmentCoursesTable extends Component {
       })
         .then(function(response) {
           console.log(response);
+          successToastr("La operación se realizó con exito.");
         })
         .catch(function (error) {
           console.log(error);
@@ -436,6 +471,7 @@ export default class DepartmentCoursesTable extends Component {
     return (
         <div>
             {modal}
+            {this.state.confirmModal}
 
             <ToastContainer
             ref={ref => container = ref}
