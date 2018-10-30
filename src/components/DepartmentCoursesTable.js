@@ -468,6 +468,13 @@ export default class DepartmentCoursesTable extends Component {
       );
     }
 
+    let mDepartmentName;
+    if (this.state.department !== '') {
+      mDepartmentName = this.state.departmentList.find(department => department.value === this.state.department).label;
+    } else {
+      mDepartmentName = "Departamento";
+    }
+
     return (
         <div>
             {modal}
@@ -478,7 +485,16 @@ export default class DepartmentCoursesTable extends Component {
             className="toast-top-right"
             />
             <div className="flex-parent">
-                <h1 className="table-title">Cursos</h1>
+                {this.props.childProps.role === 'Admin'
+                  ? <div>
+                      <h1 className="table-title">Cursos</h1>
+                      <h4 className="table-title">{mDepartmentName}</h4>
+                    </div>
+                  : <div>
+                      <h1 className="table-title">Cursos</h1>
+                      <h4 className="table-title">Departamento</h4>
+                    </div>
+                }
 
                 {this.props.childProps.role === 'Admin'
                   ? <Select
