@@ -25,7 +25,7 @@ export default class CourseExams extends Component {
       this.props.isAuthenticated &&
       <div>
         <h1>Fechas de Examen</h1>
-        <h4>Matería: {this.props.match.params.subject}</h4>
+        <h4><strong>Matería:</strong> {this.props.match.params.subject}</h4>
         <br />
         <ExamsTable childProps={childProps}/>
       </div>

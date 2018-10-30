@@ -27,7 +27,9 @@ export default class ExamStudents extends Component {
     return (
       this.props.isAuthenticated &&
       <div>
-        <h1>{this.props.match.params.subject + " - " + mDate}</h1>
+        <h1>Alumnos Inscriptos - Examen</h1>
+        <h4><strong>Matería:</strong> {this.props.match.params.subject}</h4>
+        <h4><strong>Fecha:</strong> {mDate}</h4>
         <br />
         <ExamStudentsTable childProps={childProps}/>
       </div>

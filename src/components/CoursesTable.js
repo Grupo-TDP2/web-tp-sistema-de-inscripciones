@@ -316,7 +316,7 @@ export default class CoursesTable extends Component {
 
     let mTeacherName;
     if (this.state.teacherID !== '') {
-      mTeacherName = "Docente: " + this.state.teacherList.find(teacher => teacher.value === this.state.teacherID).label;
+      mTeacherName = ": " + this.state.teacherList.find(teacher => teacher.value === this.state.teacherID).label;
     } else {
       mTeacherName = "";
     }
@@ -327,7 +327,7 @@ export default class CoursesTable extends Component {
           {this.props.childProps.role === 'Admin'
             ? <div>
                 <h1>Cursos</h1>
-                <h4>{mTeacherName}</h4>
+                <h4><strong>Docente</strong>{mTeacherName}</h4>
               </div>
             : <div>
                 <h1>Mis Cursos</h1>
