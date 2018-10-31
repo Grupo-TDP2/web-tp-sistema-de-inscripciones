@@ -395,9 +395,11 @@ export default class DepartmentCoursesTable extends Component {
   }
 
   handleDepartmentChange(e) {
-    this.setState({getURL: "/departments/" + e.value + "/subjects", department: e.value});
+    if (this.state.departmentList.map(department => department.value).includes(e.value)) {
+      this.setState({getURL: "/departments/" + e.value + "/subjects", department: e.value});
 
-    this.loadCourses("/departments/" + e.value + "/subjects");
+      this.loadCourses("/departments/" + e.value + "/subjects");
+    }    
   }
 
   render() {

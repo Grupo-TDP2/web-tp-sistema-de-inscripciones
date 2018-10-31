@@ -202,9 +202,11 @@ export default class CoursesTable extends Component {
   }
 
   handleTeacherChange(e) {
-    this.setState({ teacherID: e.value });
+    if (this.state.teacherList.map(teacher => teacher.value).includes(e.value)) {
+      this.setState({ teacherID: e.value });
 
-    this.loadCourses(e.value);
+      this.loadCourses(e.value);
+    }
   }
 
   async handleAcceptFreeClick(e, row) {
