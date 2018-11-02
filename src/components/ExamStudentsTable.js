@@ -9,6 +9,8 @@ import API_URI from "../config/GeneralConfig.js";
 import OptionsToggle from "./OptionsToggle";
 import SetGradeModal from "./SetGradeModal";
 
+const FileDownload = require('js-file-download');
+
 let container;
  
 export default class ExamStudentsTable extends Component {
@@ -58,14 +60,34 @@ export default class ExamStudentsTable extends Component {
 
           let mStudents = [];
 
+          const schoolTermMappings = {
+            "first_semester": "1º",
+            "second_semester": "2º",
+            "summer_school": "Curso Verano"
+          };
+
           response.data.forEach(studentExam => {
             let mStudent = {
               studentID: studentExam.student.id,
               name: studentExam.student.last_name + ', ' + studentExam.student.first_name,
-              studentNumber: studentExam.student.school_document_number,
-              schoolTerm: '2º 2018', //Tomar del endpoint
-              approved: 3, //Tomar del endpoint
-              grade: studentExam.qualification
+              studentNumber: studentExam.student.school_document_number
+            }
+
+            if (studentExam.qualification === null) {
+              mStudent.approved = 3;
+              mStudent.grade = "";
+            } else if (studentExam.qualification > 4) {
+              mStudent.approved = 1;
+              mStudent.grade = studentExam.qualification;
+            } else {
+              mStudent.approved = 2;
+              mStudent.grade = "";
+            }
+
+            if (studentExam.approved_school_term !== null) {
+              mStudent.schoolTerm = schoolTermMappings[studentExam.approved_school_term.term] + " " + studentExam.approved_school_term.year;
+            } else {
+              mStudent.schoolTerm = "";
             }
 
             if (studentExam.condition === "regular") {
@@ -73,14 +95,6 @@ export default class ExamStudentsTable extends Component {
             } else {
               mStudent.condition = "Libre";
             }
-
-            /*if (student.status === 'approved') {
-              mStudent.approved = 1;
-            } else if (student.status === 'not_evaluated') {
-              mStudent.approved = 3;
-            } else {
-              mStudent.approved = 2;
-            }*/
 
             mStudents.push(mStudent);
           });
@@ -101,21 +115,20 @@ export default class ExamStudentsTable extends Component {
     const errorToastr = message => this.displayErrorToastr(message);
     const setLoaderMsg = mLoaderMsg => this.setState({ loaderMsg: mLoaderMsg });
 
-    /*await axios({
+    await axios({
       method:'get',
       url: API_URI + this.URL[this.props.childProps.role].export,
       headers: {'Authorization': this.props.childProps.token}
       })
         .then(function(response) {
           console.log(response);
+          FileDownload(response.data, 'reporte.csv');
         })
         .catch(function (error) {
           console.log(error);
           errorToastr("No se pudieron cargar los datos.");
           setLoaderMsg("No se pudieron cargar los datos.");
-        });*/
-
-    errorToastr("Función habilitada proximamente.");
+        });
   }
 
   async componentDidMount() {
