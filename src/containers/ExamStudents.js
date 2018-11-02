@@ -18,6 +18,8 @@ export default class ExamStudents extends Component {
       courseID: this.props.match.params.courseID,
       examID: this.props.match.params.examID,
       departmentID: this.props.match.params.department,
+      subject: this.props.match.params.subject,
+      examDate: this.props.match.params.date,
       role: this.props.role
     };
 
