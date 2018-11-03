@@ -45,6 +45,7 @@ export default class ExamStudentsTable extends Component {
     this.handleStudentModalClose = this.handleStudentModalClose.bind(this);
     this.handleSetGrade = this.handleSetGrade.bind(this);
     this.exportStudentList = this.exportStudentList.bind(this);
+    this.handleEditGrades = this.handleEditGrades.bind(this);
   }
 
   async loadStudents() {
@@ -70,7 +71,7 @@ export default class ExamStudentsTable extends Component {
 
           response.data.forEach(studentExam => {
             let mStudent = {
-              studentID: studentExam.student.id,
+              studentID: studentExam.id,
               name: studentExam.student.last_name + ', ' + studentExam.student.first_name,
               studentNumber: studentExam.student.school_document_number
             }
@@ -94,10 +95,16 @@ export default class ExamStudentsTable extends Component {
 
             if (studentExam.condition === "regular") {
               mStudent.condition = "Regular";
-              mStudent.partialGrade = studentExam.approved_course.partial_qualification;
             } else {
               mStudent.condition = "Libre";
+            }
+
+            if (studentExam.approved_course !== null) {
+              mStudent.partialGrade = studentExam.approved_course.partial_qualification;
+              mStudent.fullGrade = studentExam.approved_course.final_qualification;
+            } else {
               mStudent.partialGrade = "";
+              mStudent.fullGrade = "";
             }
 
             mStudents.push(mStudent);
@@ -157,32 +164,32 @@ export default class ExamStudentsTable extends Component {
     this.setState({ setGradeModal: '' });
   }
 
-  async handleSetGrade(grade, studentID) {
-    /*const errorToastr = message => this.displayErrorToastr(message);
+  async handleSetGrade(examGrade, fullGrade, studentID) {
+    const errorToastr = message => this.displayErrorToastr(message);
+    const successToastr = message => this.displaySuccessToastr(message);
 
-    const mEnrolment = {
-      status: "approved",
-      partial_qualification: grade
+    const mGrades = {
+      qualification: examGrade,
+      final_qualification: fullGrade
     };
 
     let mURL;
 
     if (this.props.childProps.role === "Admin") {
-      mURL = "/departments/" + this.props.childProps.departmentID + "/courses/" + this.props.childProps.courseID + "/enrolments/" + studentID;
+      mURL = "/departments/" + this.props.childProps.departmentID + "/courses/" + this.props.childProps.courseID + "/exams/" + this.props.childProps.examID + "/student_exams/" + studentID;
     } else {
-      mURL = "/teachers/me/courses/" + this.props.childProps.courseID + "/enrolments/" + studentID;
+      mURL = "/teachers/me/courses/" + this.props.childProps.courseID + "/exams/" + this.props.childProps.examID + "/student_exams/" + studentID;
     }
 
     await axios({
-      method:'put',
-      data: {
-          enrolment: mEnrolment
-      },
+      method:'patch',
+      data: mGrades,
       url: API_URI + mURL,
       headers: {'Authorization': this.props.childProps.token}
       })
         .then(function(response) {
           console.log(response);
+          successToastr("La operación se realizó con exito.");
         })
         .catch(function (error) {
           console.log(error);
@@ -191,7 +198,7 @@ export default class ExamStudentsTable extends Component {
 
     this.loadStudents();
 
-    this.setState({ setGradeModal: '' });*/
+    this.setState({ setGradeModal: '' });
   }
 
   async handleChangeExamApproval(e, row) {
@@ -199,6 +206,9 @@ export default class ExamStudentsTable extends Component {
       const modalProps = {
         handleClose: this.handleStudentModalClose,
         handleSetGrade: this.handleSetGrade,
+        setFullGrade: true,
+        currentGrade: null,
+        currentFullGrade: null,
         studentInfo: row
       }
 
@@ -248,12 +258,26 @@ export default class ExamStudentsTable extends Component {
     }
   }
 
+  handleEditGrades(cell, row) {
+    const modalProps = {
+      handleClose: this.handleStudentModalClose,
+      handleSetGrade: this.handleSetGrade,
+      setFullGrade: true,
+      currentGrade: row.examGrade,
+      currentFullGrade: row.fullGrade,
+      studentInfo: row
+    }
+
+    this.setState({ setGradeModal: <SetGradeModal modalProps={modalProps}/>});
+  }
+
   render() {
     if (this.state.redirect) {
       return <Redirect push to={`${this.state.redirectTo}`} />;
     }
 
     const handleChangeExamApproval = (cell,row) => this.handleChangeExamApproval(cell,row);
+    const handleEditGrades = (cell,row) => this.handleEditGrades(cell,row);
 
     const customCSVBtn = (onClick) => {
       return (
@@ -300,6 +324,16 @@ export default class ExamStudentsTable extends Component {
       );
     }
 
+    function editGradesButtonFormatter(cell, row){
+      return (
+        <div>
+            <Button className="action-button" onClick={() => handleEditGrades(cell,row)}>
+                <Glyphicon glyph="pencil" />&nbsp;
+            </Button>
+        </div>
+      );
+    }
+
     return (
       <div>
         {this.state.setGradeModal}
@@ -312,12 +346,14 @@ export default class ExamStudentsTable extends Component {
                     headerStyle={ { background: '#f8f8f8' } } pagination={ true } search={ true } searchPlaceholder={'Buscar'}>
             <TableHeaderColumn dataField='studentID' hidden={ true } width='80' isKey={ true } headerAlign='center' dataAlign='center'>ID Alumno</TableHeaderColumn>
             <TableHeaderColumn dataField='name' dataSort={ true } headerAlign='center' dataAlign='center'>Nombre</TableHeaderColumn>
-            <TableHeaderColumn dataField='studentNumber' dataSort={ true } width='120' headerAlign='center' dataAlign='center'>Padron</TableHeaderColumn>
-            <TableHeaderColumn dataField='condition' width='130' headerAlign='center' dataAlign='center'>Condición</TableHeaderColumn>
-            <TableHeaderColumn dataField='schoolTerm' width='130' headerAlign='center' dataAlign='center'>Cuatrimestre</TableHeaderColumn>
+            <TableHeaderColumn dataField='studentNumber' dataSort={ true } width='100' headerAlign='center' dataAlign='center'>Padron</TableHeaderColumn>
+            <TableHeaderColumn dataField='condition' width='100' headerAlign='center' dataAlign='center'>Condición</TableHeaderColumn>
+            <TableHeaderColumn dataField='schoolTerm' width='105' headerAlign='center' dataAlign='center'>Cuatrimestre</TableHeaderColumn>
             <TableHeaderColumn dataField='partialGrade' dataSort={ true } width='90' headerAlign='center' dataAlign='center'>Cursada</TableHeaderColumn>
             <TableHeaderColumn dataField='approvedExam' width='210' headerAlign='center' dataAlign='center' dataFormat={(cell, row) => approvedCheckboxFormatter(cell, row)}>Examen</TableHeaderColumn>
-            <TableHeaderColumn dataField='examGrade' dataSort={ true } width='90' headerAlign='center' dataAlign='center'>Nota Examen</TableHeaderColumn>
+            <TableHeaderColumn dataField='examGrade' dataSort={ true } width='120' headerAlign='center' dataAlign='center'>Nota Examen</TableHeaderColumn>
+            <TableHeaderColumn dataField='fullGrade' dataSort={ true } width='110' headerAlign='center' dataAlign='center'>Nota Cierre</TableHeaderColumn>
+            <TableHeaderColumn dataField='actions' width='90' headerAlign='center' dataAlign='center' dataFormat={editGradesButtonFormatter}>Acciones</TableHeaderColumn>
         </BootstrapTable>
       </div>
     );

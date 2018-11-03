@@ -27,3 +27,11 @@
     margin-top: auto;
     margin-bottom: auto;
 }
+
+.center-item {
+    align-self: center;
+}
+
+.extra-grade {
+    margin-top: 20px;
+}

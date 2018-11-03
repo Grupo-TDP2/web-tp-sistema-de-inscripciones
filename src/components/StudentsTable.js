@@ -156,6 +156,9 @@ export default class StudentsTable extends Component {
       const modalProps = {
         handleClose: this.handleStudentModalClose,
         handleSetGrade: this.handleSetGrade,
+        setFullGrade: false,
+        currentGrade: null,
+        currentFullGrade: null,
         studentInfo: row
       }
 
