@@ -328,6 +328,7 @@ export default class DepartmentCoursesTable extends Component {
   }
 
   handleTeachersMoreInfoClick(row) {
+    console.log(row.teachers);
     this.setState({ 
         showTeachersModal: true,
         teachersModalProps: {
@@ -346,6 +347,7 @@ export default class DepartmentCoursesTable extends Component {
   async handleAddTeacher(teacher, courseID, subjectID) {
     const errorToastr = message => this.displayErrorToastr(message);
     const successToastr = message => this.displaySuccessToastr(message);
+    const loadCourses = () => this.loadCourses(this.state.getURL);
 
     let mURL;
 
@@ -373,10 +375,10 @@ export default class DepartmentCoursesTable extends Component {
         .then(function(response) {
           console.log(response);
           successToastr("La operación se realizó con exito.");
+          loadCourses();
         })
         .catch(function (error) {
           console.log(error);
-          response = false;
           if (error.toString().includes("422")) {
             errorToastr("El docente ya se encuentra asociado con otro curso de esta materia.");  
           } else {
