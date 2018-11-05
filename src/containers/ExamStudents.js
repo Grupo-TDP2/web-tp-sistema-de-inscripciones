@@ -1,7 +1,7 @@
 import React, { Component } from "react";
-import ExamsTable from "../components/ExamsTable"
+import ExamStudentsTable from "../components/ExamStudentsTable"
 
-export default class CourseExams extends Component {
+export default class ExamStudents extends Component {
 
   constructor(props) {
     super(props);
@@ -16,18 +16,24 @@ export default class CourseExams extends Component {
       token: this.props.token,
       handleLogout: this.props.handleLogout,
       courseID: this.props.match.params.courseID,
+      examID: this.props.match.params.examID,
       departmentID: this.props.match.params.department,
       subject: this.props.match.params.subject,
+      examDate: this.props.match.params.date,
       role: this.props.role
     };
+
+    let mDateSplit = this.props.match.params.date.split('-');
+    const mDate = mDateSplit[0] + '/' + mDateSplit[1] + '/' + mDateSplit[2];
 
     return (
       this.props.isAuthenticated &&
       <div>
-        <h1>Fechas de Examen</h1>
+        <h1>Alumnos Inscriptos - Examen</h1>
         <h4><strong>Matería:</strong> {this.props.match.params.subject}</h4>
+        <h4><strong>Fecha:</strong> {mDate}</h4>
         <br />
-        <ExamsTable childProps={childProps}/>
+        <ExamStudentsTable childProps={childProps}/>
       </div>
     );
   }

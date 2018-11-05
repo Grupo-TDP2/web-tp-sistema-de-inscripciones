@@ -11,6 +11,7 @@ import "./Toastr.css";
 import 'react-datepicker/dist/react-datepicker.css';
 import API_URI from "../config/GeneralConfig.js";
 import './ExamsTable.css';
+import ConfirmModal from './ConfirmModal';
 
 let container;
  
@@ -24,6 +25,7 @@ export default class ExamsTable extends Component {
         loaderMsg: 'Cargando la informacion...',
         redirect: false,
         redirectTo: '',
+        confirmModal: '',
         availableClassrooms: [],
         availableExamWeeks: [],
         newBuilding: '',
@@ -34,8 +36,8 @@ export default class ExamsTable extends Component {
         newHour: ''
     };
 
-    this.customTitle = this.customTitle.bind(this);
     this.displayErrorToastr = this.displayErrorToastr.bind(this);
+    this.displaySuccessToastr = this.displaySuccessToastr.bind(this);
     this.handleDeleteClick = this.handleDeleteClick.bind(this);
     this.handleGoBack = this.handleGoBack.bind(this);
     this.handleBuildingChange = this.handleBuildingChange.bind(this);
@@ -45,6 +47,8 @@ export default class ExamsTable extends Component {
     this.handleHourChange = this.handleHourChange.bind(this);
     this.addNewExamDate = this.addNewExamDate.bind(this);
     this.loadExamDates = this.loadExamDates.bind(this);
+    this.handleShowExamStudents = this.handleShowExamStudents.bind(this);
+    this.handleModalClose = this.handleModalClose.bind(this);
   }
 
   async componentDidMount() {
@@ -172,8 +176,10 @@ export default class ExamsTable extends Component {
       );
   }
 
-  customTitle(cell, row, rowIndex, colIndex) {
-    return `Doble click para editar`;
+  displaySuccessToastr(message) {
+    container.success(<div></div>, <em>{message}</em>, 
+        {closeButton: true, timeOut: 3000}
+      );
   }
 
   handleBuildingChange(e) {
@@ -200,8 +206,9 @@ export default class ExamsTable extends Component {
     this.setState({ newHour: e.value });
   }  
 
-  async handleDeleteClick(cell, row) {
+  async handleDelete(row) {
     const errorToastr = message => this.displayErrorToastr(message);
+    const successToastr = message => this.displaySuccessToastr(message);
 
     let mURL;
 
@@ -218,6 +225,7 @@ export default class ExamsTable extends Component {
       })
         .then(function(response) {
           console.log(response);
+          successToastr("La operación se realizó con exito.");
         })
         .catch(function (error) {
           console.log(error);
@@ -225,10 +233,28 @@ export default class ExamsTable extends Component {
         });
 
     this.loadExamDates();
+    this.setState({ confirmModal: '' });
+  }
+
+  handleModalClose() {
+    this.setState({ confirmModal: '' });
+  }
+
+  handleDeleteClick(cell, row) {
+    const modalProps = {
+      message: 'Estás seguro que deseas eliminar este examen? Esta operación no se puede deshacer.',
+      messageTitle: 'Eliminar Examen?',
+      type: 'confirmDelete',
+      handleClose: this.handleModalClose,
+      handleConfirmAction: () => this.handleDelete(row)
+    };
+
+    this.setState({ confirmModal: <ConfirmModal modalProps={modalProps}/> });  
   }
 
   async addNewExamDate() {
     const errorToastr = message => this.displayErrorToastr(message);
+    const successToastr = message => this.displaySuccessToastr(message);
     const loadExamDates = () => this.loadExamDates();
 
     const payload = {
@@ -255,6 +281,7 @@ export default class ExamsTable extends Component {
       })
         .then(function(response) {
           console.log(response);
+          successToastr("La operación se realizó con exito.");
 
           loadExamDates();
         })
@@ -275,12 +302,23 @@ export default class ExamsTable extends Component {
     });
   }
 
+  handleShowExamStudents(cell, row) {
+    let mDateSplit = row.date.split('/');
+    const mDate = mDateSplit[0] + '-' + mDateSplit[1] + '-' + mDateSplit[2];
+
+    this.setState({
+        redirect: true,
+        redirectTo: '/examStudents/' + this.props.childProps.courseID + '/' + this.props.childProps.subject + '/' + this.props.childProps.departmentID + '/' + mDate + '/' + row.examID
+    });
+  }
+
   render() {
     if (this.state.redirect) {
       return <Redirect push to={`${this.state.redirectTo}`} />;
     }
 
     const handleDeleteClick = (cell,row) => this.handleDeleteClick(cell,row);
+    const handleShowExamStudents = (cell,row) => this.handleShowExamStudents(cell,row);
 
     const availableBuildings = [
       {
@@ -353,6 +391,14 @@ export default class ExamsTable extends Component {
       );
     }
 
+    function studentsBtnFormatter(cell, row){
+      return (
+        <Button className="submitButton" onClick={() => handleShowExamStudents(cell,row)}>
+            <Glyphicon glyph="education" />&nbsp;
+        </Button>
+      );
+    }
+
     /*function customSortFunction(a, b, order) {   // order is desc or asc
       if (order === 'desc') {
         return a.name.split(' ')[1].localeCompare(b.name.split(' ')[1]);
@@ -363,6 +409,8 @@ export default class ExamsTable extends Component {
 
     return (
       <div>
+        {this.state.confirmModal}
+
         <Row className="addDateRow">
           <Col xs={12} sm={2}>
             <p>Semana</p>
@@ -447,7 +495,8 @@ export default class ExamsTable extends Component {
             <TableHeaderColumn dataField='building' width='160' headerAlign='center' dataAlign='center'>Sede</TableHeaderColumn>
             <TableHeaderColumn dataField='classroom' width='160' headerAlign='center' dataAlign='center'>Aula</TableHeaderColumn>
             <TableHeaderColumn dataField="free" width='140' headerAlign='center' dataAlign='center'>Libres</TableHeaderColumn>
-            <TableHeaderColumn dataField="button" width='140' headerAlign='center' dataAlign='center' dataFormat={buttonFormatter}></TableHeaderColumn>
+            <TableHeaderColumn dataField="students" width='140' headerAlign='center' dataAlign='center' dataFormat={studentsBtnFormatter}>Alumnos</TableHeaderColumn>
+            <TableHeaderColumn dataField="button" width='140' headerAlign='center' dataAlign='center' dataFormat={buttonFormatter}>Acciones</TableHeaderColumn>
         </BootstrapTable>
         <Button className="submitButton goBackBtn" onClick={this.handleGoBack}>
             <Glyphicon glyph="chevron-left" /> Volver a Mis Cursos

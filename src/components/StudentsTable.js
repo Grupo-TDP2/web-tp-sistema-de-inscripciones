@@ -7,6 +7,7 @@ import { ToastContainer } from "react-toastr";
 import "./Toastr.css";
 import API_URI from "../config/GeneralConfig.js";
 import SetGradeModal from "./SetGradeModal";
+import OptionsToggle from "./OptionsToggle";
 
 let container;
  
@@ -25,6 +26,7 @@ export default class StudentsTable extends Component {
 
     this.customTitle = this.customTitle.bind(this);
     this.displayErrorToastr = this.displayErrorToastr.bind(this);
+    this.displaySuccessToastr = this.displaySuccessToastr.bind(this);
     this.handleClick = this.handleClick.bind(this);
     this.handleChangeApproval = this.handleChangeApproval.bind(this);
     this.handleStudentModalClose = this.handleStudentModalClose.bind(this);
@@ -44,10 +46,6 @@ export default class StudentsTable extends Component {
       })
         .then(function(response) {
           console.log(response);
-
-          if (response.data.length === 0) {
-            setLoaderMsg("No hay datos disponibles.");
-          }
 
           let mStudents = [];
 
@@ -77,6 +75,7 @@ export default class StudentsTable extends Component {
           });
 
           setStudents(mStudents);
+          setLoaderMsg("No hay datos disponibles.");
         })
         .catch(function (error) {
           console.log(error);
@@ -95,6 +94,12 @@ export default class StudentsTable extends Component {
       );
   }
 
+  displaySuccessToastr(message) {
+    container.success(<div></div>, <em>{message}</em>, 
+        {closeButton: true, timeOut: 3000}
+      );
+  }
+
   customTitle(cell, row, rowIndex, colIndex) {
     return `Doble click para editar`;
   }
@@ -109,6 +114,7 @@ export default class StudentsTable extends Component {
 
   async handleSetGrade(grade, studentID) {
     const errorToastr = message => this.displayErrorToastr(message);
+    const successToastr = message => this.displaySuccessToastr(message);
 
     const mEnrolment = {
       status: "approved",
@@ -133,6 +139,7 @@ export default class StudentsTable extends Component {
       })
         .then(function(response) {
           console.log(response);
+          successToastr("La operación se realizó con exito.");
         })
         .catch(function (error) {
           console.log(error);
@@ -149,12 +156,16 @@ export default class StudentsTable extends Component {
       const modalProps = {
         handleClose: this.handleStudentModalClose,
         handleSetGrade: this.handleSetGrade,
+        setFullGrade: false,
+        currentGrade: null,
+        currentFullGrade: null,
         studentInfo: row
       }
 
       this.setState({ setGradeModal: <SetGradeModal modalProps={modalProps}/>});
     } else {
       const errorToastr = message => this.displayErrorToastr(message);
+      const successToastr = message => this.displaySuccessToastr(message);
 
       const mEnrolment = {
         partial_qualification: null
@@ -184,6 +195,7 @@ export default class StudentsTable extends Component {
         })
           .then(function(response) {
             console.log(response);
+            successToastr("La operación se realizó con exito.");
           })
           .catch(function (error) {
             console.log(error);
@@ -228,8 +240,19 @@ export default class StudentsTable extends Component {
     }
 
     function approvedCheckboxFormatter(cell, row){
+      const childProps = {
+        valueProp: cell,
+        handleChange: handleChangeApproval,
+        row: row,
+        options: [
+          {value: 1, label: "Si"},
+          {value: 2, label: "No"},
+          {value: 3, label: "En Curso"}
+        ]
+      };
+
       return (
-        <ApprovedToggle approved={ cell } handleChange={handleChangeApproval} row={ row } />
+        <OptionsToggle childProps={ childProps } />
       );
     }
 
@@ -252,22 +275,6 @@ export default class StudentsTable extends Component {
             <TableHeaderColumn dataField='grade' dataSort={ true } width='90' headerAlign='center' dataAlign='center'>Nota</TableHeaderColumn>
         </BootstrapTable>
       </div>
-    );
-  }
-}
-
-class ApprovedToggle extends React.Component {
-  render() {
-    return (
-      <ToggleButtonGroup 
-        type="radio" 
-        name="options"
-        value={this.props.approved}
-        onChange={(e) => this.props.handleChange(e,this.props.row)}>
-          <ToggleButton value={1}>Si</ToggleButton>
-          <ToggleButton value={2}>No</ToggleButton>
-          <ToggleButton value={3}>En Curso</ToggleButton>
-      </ToggleButtonGroup>
     );
   }
 }

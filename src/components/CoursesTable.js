@@ -7,6 +7,7 @@ import { ToastContainer } from "react-toastr";
 import "./Toastr.css";
 import "./CoursesTable.css";
 import API_URI from "../config/GeneralConfig.js";
+import OptionsToggle from "./OptionsToggle";
 import Select from 'react-select';
 
 let container;
@@ -202,9 +203,11 @@ export default class CoursesTable extends Component {
   }
 
   handleTeacherChange(e) {
-    this.setState({ teacherID: e.value });
+    if (this.state.teacherList.map(teacher => teacher.value).includes(e.value)) {
+      this.setState({ teacherID: e.value });
 
-    this.loadCourses(e.value);
+      this.loadCourses(e.value);
+    }
   }
 
   async handleAcceptFreeClick(e, row) {
@@ -298,15 +301,40 @@ export default class CoursesTable extends Component {
     }
 
     function freeCheckboxFormatter(cell, row){
+      const childProps = {
+        valueProp: cell,
+        handleChange: handleAcceptFreeClick,
+        row: row,
+        options: [
+          {value: 1, label: "Si"},
+          {value: 2, label: "No"}
+        ]
+      };
+
       return (
-        <AcceptFreeToggle acceptFree={ cell } handleChange={handleAcceptFreeClick} row={ row } />
+        <OptionsToggle childProps={ childProps } />
       );
+    }
+
+    let mTeacherName;
+    if (this.state.teacherID !== '') {
+      mTeacherName = ": " + this.state.teacherList.find(teacher => teacher.value === this.state.teacherID).label;
+    } else {
+      mTeacherName = "";
     }
 
     return (
       <div>
         <div className="flexParent">
-          <h1>Cursos</h1>
+          {this.props.childProps.role === 'Admin'
+            ? <div>
+                <h1>Cursos</h1>
+                <h4><strong>Docente</strong>{mTeacherName}</h4>
+              </div>
+            : <div>
+                <h1>Mis Cursos</h1>
+              </div>
+          }
 
           {this.props.childProps.role === 'Admin'
             ? <Select
@@ -339,21 +367,6 @@ export default class CoursesTable extends Component {
             <TableHeaderColumn dataField='department' hidden={ true }>Departamento</TableHeaderColumn>
         </BootstrapTable>
       </div>
-    );
-  }
-}
-
-class AcceptFreeToggle extends React.Component {
-  render() {
-    return (
-      <ToggleButtonGroup 
-        type="radio" 
-        name="options"
-        value={this.props.acceptFree}
-        onChange={(e) => this.props.handleChange(e,this.props.row)}>
-          <ToggleButton value={1}>Si</ToggleButton>
-          <ToggleButton value={2}>No</ToggleButton>
-      </ToggleButtonGroup>
     );
   }
 }

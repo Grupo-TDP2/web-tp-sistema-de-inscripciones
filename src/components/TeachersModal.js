@@ -95,24 +95,35 @@ export default class TeachersModal extends Component {
       this.setState({ newTeacherID: parseInt(e.value, 10) });
     }
 
-    handleSubmitNewTeacher() {
+    async handleSubmitNewTeacher() {
+      const setCurrentTeachers = mCurrentTeachers => this.setState({ currentTeachers: mCurrentTeachers });
+      const getState = () => this.state;
+      const positionMappings = this.positionMappings;
+
       if (this.state.currentTeachers.every(teacher => teacher.id !== this.state.newTeacherID)) {
         const teacherAddResponse = this.props.childProps.handleAddTeacher({
           id: this.state.newTeacherID,
           position: this.state.newTeacherPosition
         }, this.props.childProps.courseInfo.id, this.props.childProps.courseInfo.subjectID);
         
-        if (teacherAddResponse === true) {
-          let mCurrentTeachers = this.state.currentTeachers;
-          mCurrentTeachers.push({
-            id: this.state.newTeacherID,
-            first_name: this.state.availableTeachers.find(teacher => teacher.value === this.state.newTeacherID).label.split(" ")[0],
-            last_name: this.state.availableTeachers.find(teacher => teacher.value === this.state.newTeacherID).label.split(" ")[1],
-            position: this.state.newTeacherPosition,
-            positionMapped: this.positionMappings[this.state.newTeacherPosition]
+        await teacherAddResponse
+          .then(function(response) {
+            if (response === true) {
+              let mCurrentTeachers = getState().currentTeachers;
+              mCurrentTeachers.push({
+                id: getState().newTeacherID,
+                first_name: getState().availableTeachers.find(teacher => teacher.value === getState().newTeacherID).label.split(" ")[0],
+                last_name: getState().availableTeachers.find(teacher => teacher.value === getState().newTeacherID).label.split(" ")[1],
+                position: getState().newTeacherPosition,
+                positionMapped: positionMappings[getState().newTeacherPosition]
+              });
+              setCurrentTeachers(mCurrentTeachers);
+            }
+          })
+          .catch(function (error) {
+            console.log(error);
           });
-          this.setState({currentTeachers: mCurrentTeachers});
-        }
+          
       } else {
         this.props.childProps.displayErrorToastr("El docente ya esta asociado con este curso.");
       }

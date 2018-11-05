@@ -10,14 +10,26 @@ export default class SetGradeModal extends Component {
 
       this.state = {
         show: true,
-        grade: null
+        grade: this.props.modalProps.currentGrade,
+        showFullGrade: false,
+        fullGrade: this.props.modalProps.currentFullGrade
       };
 
       this.handleGradeChange = this.handleGradeChange.bind(this);
+      this.handleFullGradeChange = this.handleFullGradeChange.bind(this);
+      this.enableFullGrade = this.enableFullGrade.bind(this);
     }
 
     handleGradeChange(e) {
       this.setState({ grade: e.value });
+    }
+
+    handleFullGradeChange(e) {
+      this.setState({ fullGrade: e.value });
+    }
+
+    enableFullGrade() {
+      this.setState({ showFullGrade: true });
     }
   
     render() {
@@ -47,16 +59,41 @@ export default class SetGradeModal extends Component {
                             className="basic-single modal-select sub-flex-item"
                             classNamePrefix="select"
                             placeholder="Seleccione..."
+                            defaultValue={possibleGrades[possibleGrades.findIndex(grade => grade.value === this.state.grade)]}
                             onChange={this.handleGradeChange}
                             name="grade"
                             options={possibleGrades}
                         />
                     </div>
+                    {this.props.modalProps.setFullGrade && !this.state.showFullGrade && this.props.modalProps.currentFullGrade === null
+                      ? <div className="teachers-modal-main-item center-item extra-grade">
+                            <Button onClick={this.enableFullGrade}>Asignar Nota de Cierre</Button>
+                        </div>
+                      : <div />
+                    }
+                    {(this.props.modalProps.setFullGrade && this.state.showFullGrade) || this.props.modalProps.currentFullGrade !== null
+                      ? <div className="teachers-modal-main-item subFlex extra-grade">
+                            <p className="subFlexItem">Ingrese la nota de cierre del alumno:</p>
+                            <Select
+                                className="basic-single modal-select sub-flex-item"
+                                classNamePrefix="select"
+                                placeholder="Seleccione..."
+                                defaultValue={possibleGrades[possibleGrades.findIndex(grade => grade.value === this.state.fullGrade)]}
+                                onChange={this.handleFullGradeChange}
+                                name="grade"
+                                options={possibleGrades}
+                            />
+                        </div>
+                      : <div />
+                    }
                 </div>
             </Modal.Body>
             <Modal.Footer>
                 <div className="footerFlex">
-                    <Button onClick={() => this.props.modalProps.handleSetGrade(this.state.grade, this.props.modalProps.studentInfo.studentID)}>Guardar</Button>
+                    {this.props.modalProps.setFullGrade
+                      ? <Button onClick={() => this.props.modalProps.handleSetGrade(this.state.grade, this.state.fullGrade, this.props.modalProps.studentInfo.studentID)}>Guardar</Button>
+                      : <Button onClick={() => this.props.modalProps.handleSetGrade(this.state.grade, this.props.modalProps.studentInfo.studentID)}>Guardar</Button>
+                    }
                     <Button onClick={this.props.modalProps.handleClose}>Cancelar</Button>
                 </div>
             </Modal.Footer>

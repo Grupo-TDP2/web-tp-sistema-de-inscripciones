@@ -23,7 +23,8 @@ export default class CourseStudents extends Component {
     return (
       this.props.isAuthenticated &&
       <div>
-        <h1>{this.props.match.params.subject}</h1>
+        <h1>Alumnos Inscriptos - Curso</h1>
+        <h4><strong>Matería:</strong> {this.props.match.params.subject}</h4>
         <StudentsTable childProps={childProps}/>
       </div>
     );

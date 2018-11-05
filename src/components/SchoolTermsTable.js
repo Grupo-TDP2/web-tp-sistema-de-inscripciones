@@ -11,6 +11,7 @@ import "./Toastr.css";
 import 'react-datepicker/dist/react-datepicker.css';
 import "./SchoolTermsTable.css";
 import API_URI from "../config/GeneralConfig.js";
+import ConfirmModal from './ConfirmModal';
 
 let container;
 
@@ -24,6 +25,7 @@ export default class SchoolTermsTable extends Component {
         loaderMsg: 'Cargando la informacion...',
         redirect: false,
         redirectTo: '',
+        confirmModal: '',
         newTerm: '',
         newYear: '',
         newStartDate: null,
@@ -34,11 +36,14 @@ export default class SchoolTermsTable extends Component {
     };
 
     this.displayErrorToastr = this.displayErrorToastr.bind(this);
+    this.displaySuccessToastr = this.displaySuccessToastr.bind(this);
     this.handleTermChange = this.handleTermChange.bind(this);
     this.handleYearChange = this.handleYearChange.bind(this);
     this.handleStartDateChange = this.handleStartDateChange.bind(this);
     this.addNewSchoolTerm = this.addNewSchoolTerm.bind(this);
     this.handleDeleteClick = this.handleDeleteClick.bind(this);
+    this.handleDelete = this.handleDelete.bind(this);
+    this.handleModalClose = this.handleModalClose.bind(this);
   }
 
   async componentDidMount() {
@@ -137,8 +142,9 @@ export default class SchoolTermsTable extends Component {
     
   }
 
-  async handleDeleteClick(cell, row) {
+  async handleDelete(row) {
     const errorToastr = message => this.displayErrorToastr(message);
+    const successToastr = message => this.displaySuccessToastr(message);
     const loadSchoolTerms = () => this.loadSchoolTerms();
 
     await axios({
@@ -148,6 +154,7 @@ export default class SchoolTermsTable extends Component {
       })
         .then(function(response) {
           console.log(response);
+          successToastr("La operación se realizó con exito.");
 
           loadSchoolTerms();
         })
@@ -155,10 +162,29 @@ export default class SchoolTermsTable extends Component {
           console.log(error);
           errorToastr("No se pudo eliminar el período lectivo. Intente nuevamente.");
         });
+
+    this.setState({ confirmModal: '' });
+  }
+
+  handleModalClose() {
+    this.setState({ confirmModal: '' });
+  }
+
+  handleDeleteClick(cell, row) {
+    const modalProps = {
+      message: 'Estás seguro que deseas eliminar este período lectivo? Esta operación no se puede deshacer.',
+      messageTitle: 'Eliminar Período Lectivo?',
+      type: 'confirmDelete',
+      handleClose: this.handleModalClose,
+      handleConfirmAction: () => this.handleDelete(row)
+    };
+
+    this.setState({ confirmModal: <ConfirmModal modalProps={modalProps}/> });
   }
 
   async addNewSchoolTerm() {
     const errorToastr = message => this.displayErrorToastr(message);
+    const successToastr = message => this.displaySuccessToastr(message);
     const loadSchoolTerms = () => this.loadSchoolTerms();
 
     const payload = {
@@ -180,6 +206,7 @@ export default class SchoolTermsTable extends Component {
       })
         .then(function(response) {
           console.log(response);
+          successToastr("La operación se realizó con exito.");
 
           loadSchoolTerms();
         })
@@ -191,6 +218,12 @@ export default class SchoolTermsTable extends Component {
 
   displayErrorToastr(message) {
     container.error(<div></div>, <em>{message}</em>, 
+        {closeButton: true, timeOut: 3000}
+      );
+  }
+
+  displaySuccessToastr(message) {
+    container.success(<div></div>, <em>{message}</em>, 
         {closeButton: true, timeOut: 3000}
       );
   }
@@ -263,6 +296,8 @@ export default class SchoolTermsTable extends Component {
 
     return (
       <div>
+        {this.state.confirmModal}
+
         <ToastContainer
           ref={ref => container = ref}
           className="toast-top-right"
