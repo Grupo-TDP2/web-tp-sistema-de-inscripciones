@@ -98,6 +98,9 @@ class App extends Component {
                   <LinkContainer to="/departmentCourses" activeClassName="">
                     <NavItem>Cursos - Departamento</NavItem>
                   </LinkContainer>
+                  <LinkContainer to="/importData" activeClassName="">
+                    <NavItem>Carga de Datos</NavItem>
+                  </LinkContainer>
                 </Fragment>
               : <Fragment/>
             }

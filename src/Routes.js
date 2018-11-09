@@ -10,6 +10,7 @@ import CourseExams from "./containers/CourseExams";
 import DepartmentCourses from "./containers/DepartmentCourses";
 import SchoolTerms from "./containers/SchoolTerms";
 import ExamStudents from "./containers/ExamStudents";
+import ImportData from "./containers/ImportData";
 
 export default ({ childProps }) =>
   <Switch>
@@ -21,6 +22,7 @@ export default ({ childProps }) =>
     <AppliedRoute path="/examStudents/:courseID/:subject/:department/:date/:examID" exact component={ExamStudents} props={childProps} />
     <AppliedRoute path="/departmentCourses" exact component={DepartmentCourses} props={childProps} />
     <AppliedRoute path="/schoolTerms" exact component={SchoolTerms} props={childProps} />
+    <AppliedRoute path="/importData" exact component={ImportData} props={childProps} />
     { /* Finally, catch all unmatched routes */ }
     <Route component={NotFound} />
   </Switch>;
