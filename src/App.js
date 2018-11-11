@@ -62,7 +62,7 @@ class App extends Component {
     return (
       !this.state.isAuthenticating &&
       <div className="App container">
-        <Navbar fluid collapseOnSelect>
+        <Navbar className="customNavbar" fluid collapseOnSelect>
           <Navbar.Header>
             <Navbar.Brand>
               <Link to="/">FIUBA Inscripciones</Link>

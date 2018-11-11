@@ -40,3 +40,26 @@
 .loadButton {
     width: 50%;
 }
+
+.bigGlyph {
+    font-size: 30px;
+    align-self: center;
+}
+
+.alertTitle {
+    align-self: center;
+    margin-bottom: 0px;
+    margin-left: 10px;
+}
+
+.alertFlex {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+}
+
+.resultsLabel {
+    align-self: center;
+    font-size: 15px;
+    margin-bottom: 10px;
+}
