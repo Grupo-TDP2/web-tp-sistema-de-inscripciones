@@ -101,7 +101,7 @@ export default class ImportData extends Component {
         })
         .catch(function (error) {
             console.log(error.response);
-            if (error.response.status === 400 && error.response.data.error === "ArgumentError") {
+            if (error.response.status === 400 && error.response.data.errors === "Wrong columns") {
                 setResult("Cantidad de columnas invalida o incompleta. \n\nPor favor, revise el archivo e intentelo nuevamente.");
             }
             hideAlertModal();
