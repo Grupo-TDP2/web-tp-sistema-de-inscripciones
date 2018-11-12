@@ -45,10 +45,16 @@ export default class ImportsTable extends Component {
 
             let mImports = [];
 
+            const modelMapping = {
+              "student": "Estudiante",
+              "teacher": "Docente"
+            };
+
             response.data.forEach(responseImport => {
                 mImports.push({
                     importID: responseImport.id,
                     filename: responseImport.filename,
+                    type: modelMapping[responseImport.model],
                     correct: responseImport.rows_successfuly_processed,
                     incorrect: responseImport.rows_unsuccessfuly_processed,
                     date: moment(responseImport.created_at).format("DD/MM/YYYY")
@@ -117,6 +123,7 @@ export default class ImportsTable extends Component {
                     headerStyle={ { background: '#f8f8f8' } } pagination={ true } search={ true } searchPlaceholder={'Buscar'}>
             <TableHeaderColumn dataField='importID' hidden={ true } width='80' isKey={ true } headerAlign='center' dataAlign='center'>ID Importación</TableHeaderColumn>
             <TableHeaderColumn dataField='filename' headerAlign='center' dataAlign='center'>Archivo</TableHeaderColumn>
+            <TableHeaderColumn dataField='type' width='120' headerAlign='center' dataAlign='center'>Tipo</TableHeaderColumn>
             <TableHeaderColumn dataField='correct' width='120' headerAlign='center' dataAlign='center'>Correctas</TableHeaderColumn>
             <TableHeaderColumn dataField='incorrect' width='130' headerAlign='center' dataAlign='center'>Incorrectas</TableHeaderColumn>
             <TableHeaderColumn dataField='date' width='150' headerAlign='center' dataAlign='center'>Fecha de Carga</TableHeaderColumn>

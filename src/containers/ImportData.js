@@ -21,7 +21,7 @@ export default class ImportData extends Component {
         file: "",
         inputFileName: "",
         alertModal: "",
-        result: "Archivo cargado: Alumnos_2018.csv \n\nCargados correctamente: 1800 \nCargados incorrectamente: 5 \n- Linea 128 \n- Linea 282"
+        result: ""
     };
 
     if (!this.props.isAuthenticated) {
@@ -54,6 +54,8 @@ export default class ImportData extends Component {
 
   async handleStartLoad() {
     const errorToastr = message => this.displayErrorToastr(message);
+    const setResult = mResult => this.setState({ result: mResult });
+    const getFileName = () => this.state.fileName;
     const showAlertModal = () => this.setState({
         alertModal: 
             <Modal show={true}>
@@ -85,12 +87,25 @@ export default class ImportData extends Component {
       })
         .then(function(response) {
             console.log(response);
+
+            let mResult = "Archivo cargado: " + getFileName() + "\n\nCargados correctamente: " + response.data.rows_successfuly_processed + "\nCargados incorrectamente: " + response.data.rows_unsuccessfuly_processed + "\n\n";
+            const errorsSplit = response.data.proccesed_errors.split("\\n");
+
+            errorsSplit.forEach(line => {
+                mResult = mResult + line + "\n";
+            });
+
+            setResult(mResult);
+
             hideAlertModal();
         })
         .catch(function (error) {
-          console.log(error);
-          hideAlertModal();
-          errorToastr("Ha ocurrido un error. No se pudo importar los datos.");
+            console.log(error.response);
+            if (error.response.status === 400 && error.response.data.error === "ArgumentError") {
+                setResult("Cantidad de columnas invalida o incompleta. \n\nPor favor, revise el archivo e intentelo nuevamente.");
+            }
+            hideAlertModal();
+            errorToastr("Ha ocurrido un error. No se pudo importar los datos.");
         });
   }
 
