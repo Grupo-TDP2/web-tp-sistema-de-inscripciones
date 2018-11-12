@@ -62,7 +62,7 @@ class App extends Component {
     return (
       !this.state.isAuthenticating &&
       <div className="App container">
-        <Navbar fluid collapseOnSelect>
+        <Navbar className="customNavbar" fluid collapseOnSelect>
           <Navbar.Header>
             <Navbar.Brand>
               <Link to="/">FIUBA Inscripciones</Link>
@@ -97,6 +97,9 @@ class App extends Component {
                   </LinkContainer>
                   <LinkContainer to="/departmentCourses" activeClassName="">
                     <NavItem>Cursos - Departamento</NavItem>
+                  </LinkContainer>
+                  <LinkContainer to="/importData" activeClassName="">
+                    <NavItem>Carga de Datos</NavItem>
                   </LinkContainer>
                 </Fragment>
               : <Fragment/>

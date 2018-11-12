@@ -1,0 +1,65 @@
+.importerMainFlex {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.recordsButton {
+    height: 50%;
+    align-self: center;
+}
+
+.controlLabel {
+    align-self: center;
+    margin-right: 15px;
+    margin-bottom: 0px;
+}
+
+.subFlex {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    height: 39px;
+}
+
+.subFlexSelect {
+    width: 200px;
+}
+
+.fileSelector {
+    align-self: center;
+    font-size: 16px;
+}
+
+.loadButtonFlex {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+}
+
+.loadButton {
+    width: 50%;
+}
+
+.bigGlyph {
+    font-size: 30px;
+    align-self: center;
+}
+
+.alertTitle {
+    align-self: center;
+    margin-bottom: 0px;
+    margin-left: 10px;
+}
+
+.alertFlex {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+}
+
+.resultsLabel {
+    align-self: center;
+    font-size: 15px;
+    margin-bottom: 10px;
+}

@@ -411,6 +411,11 @@ export default class ExamsTable extends Component {
       <div>
         {this.state.confirmModal}
 
+        <ToastContainer
+          ref={ref => container = ref}
+          className="toast-top-right"
+        />
+
         <Row className="addDateRow">
           <Col xs={12} sm={2}>
             <p>Semana</p>

@@ -9,6 +9,7 @@ import "./Toastr.css";
 import API_URI from "../config/GeneralConfig.js";
 import OptionsToggle from "./OptionsToggle";
 import SetGradeModal from "./SetGradeModal";
+import ConfirmModal from "./ConfirmModal";
 
 const FileDownload = require('js-file-download');
 
@@ -24,7 +25,8 @@ export default class ExamStudentsTable extends Component {
         loaderMsg: 'Cargando la informacion...',
         redirect: false,
         redirectTo: '',
-        setGradeModal: ''
+        setGradeModal: '',
+        confirmModal: ''
     };
 
     this.URL = {
@@ -42,10 +44,11 @@ export default class ExamStudentsTable extends Component {
     this.displaySuccessToastr = this.displaySuccessToastr.bind(this);
     this.loadStudents = this.loadStudents.bind(this);
     this.handleChangeExamApproval = this.handleChangeExamApproval.bind(this);
-    this.handleStudentModalClose = this.handleStudentModalClose.bind(this);
+    this.handleModalClose = this.handleModalClose.bind(this);
     this.handleSetGrade = this.handleSetGrade.bind(this);
     this.exportStudentList = this.exportStudentList.bind(this);
     this.handleEditGrades = this.handleEditGrades.bind(this);
+    this.sendGrades = this.sendGrades.bind(this);
   }
 
   async loadStudents() {
@@ -84,7 +87,11 @@ export default class ExamStudentsTable extends Component {
               mStudent.examGrade = studentExam.qualification;
             } else {
               mStudent.approvedExam = 2;
-              mStudent.examGrade = "";
+              if (studentExam.condition === "regular") {
+                mStudent.examGrade = studentExam.qualification;
+              } else {
+                mStudent.examGrade = "";
+              }
             }
 
             if (studentExam.approved_school_term !== null) {
@@ -160,17 +167,70 @@ export default class ExamStudentsTable extends Component {
       );
   }
 
-  handleStudentModalClose() {
+  handleModalClose() {
+    this.setState({ 
+      setGradeModal: '',
+      confirmModal: '' 
+    });
+  }
+
+  handleSetGrade(examGrade, fullGrade, studentID) {
+    this.sendGrades(examGrade, fullGrade, studentID);
+
     this.setState({ setGradeModal: '' });
   }
 
-  async handleSetGrade(examGrade, fullGrade, studentID) {
+  async handleDisapproval(row) {
+    let mQualification;
+    let mFinalQualification;
+    
+    if (row.condition === "Libre") {
+      mQualification = 2;
+      mFinalQualification = 2;
+    } else {
+      mQualification = 2;
+      mFinalQualification = null;
+    }
+
+    this.sendGrades(mQualification, mFinalQualification, row.studentID);
+
+    this.setState({ confirmModal: '' });
+  }
+
+  async handleChangeExamApproval(e, row) {
+    if (e === 1) {
+      const modalProps = {
+        handleClose: this.handleModalClose,
+        handleSetGrade: this.handleSetGrade,
+        setFullGrade: true,
+        currentGrade: null,
+        currentFullGrade: null,
+        studentInfo: row
+      }
+
+      this.setState({ setGradeModal: <SetGradeModal modalProps={modalProps}/>});
+    } else if (e === 2) {
+      const modalProps = {
+        message: 'Estás seguro que deseas desaprobar a ' + row.name + " (" + row.studentNumber + ")?",
+        messageTitle: 'Desaprobar Alumno?',
+        type: 'confirmDisapproval',
+        handleClose: this.handleModalClose,
+        handleConfirmAction: () => this.handleDisapproval(row)
+      };
+  
+      this.setState({ confirmModal: <ConfirmModal modalProps={modalProps}/> });
+    } else {
+      this.sendGrades(null, null, row.studentID);
+    }
+  }
+
+  async sendGrades(mQualification, mFinalQualification, studentID) {
     const errorToastr = message => this.displayErrorToastr(message);
     const successToastr = message => this.displaySuccessToastr(message);
 
     const mGrades = {
-      qualification: examGrade,
-      final_qualification: fullGrade
+      qualification: mQualification,
+      final_qualification: mFinalQualification
     };
 
     let mURL;
@@ -197,70 +257,11 @@ export default class ExamStudentsTable extends Component {
         });
 
     this.loadStudents();
-
-    this.setState({ setGradeModal: '' });
-  }
-
-  async handleChangeExamApproval(e, row) {
-    if (e === 1) {
-      const modalProps = {
-        handleClose: this.handleStudentModalClose,
-        handleSetGrade: this.handleSetGrade,
-        setFullGrade: true,
-        currentGrade: null,
-        currentFullGrade: null,
-        studentInfo: row
-      }
-
-      this.setState({ setGradeModal: <SetGradeModal modalProps={modalProps}/>});
-    } else {
-      const errorToastr = message => this.displayErrorToastr(message);
-      const successToastr = message => this.displaySuccessToastr(message);
-
-      let mGrades;
-
-      if (e === 2) {
-        mGrades = {
-          qualification: 2,
-          final_qualification: null
-        };
-      } else {
-        mGrades = {
-          qualification: null,
-          final_qualification: null
-        };
-      }  
-
-      let mURL;
-
-      if (this.props.childProps.role === "Admin") {
-        mURL = "/departments/" + this.props.childProps.departmentID + "/courses/" + this.props.childProps.courseID + "/exams/" + this.props.childProps.examID + "/student_exams/" + row.studentID;
-      } else {
-        mURL = "/teachers/me/courses/" + this.props.childProps.courseID + "/exams/" + this.props.childProps.examID + "/student_exams/" + row.studentID;
-      }
-
-      await axios({
-        method:'patch',
-        data: mGrades,
-        url: API_URI + mURL,
-        headers: {'Authorization': this.props.childProps.token}
-        })
-          .then(function(response) {
-            console.log(response);
-            successToastr("La operación se realizó con exito.");
-          })
-          .catch(function (error) {
-            console.log(error);
-            errorToastr("No se pudo editar la información del alumno. Intente nuevamente.");
-          });
-
-      this.loadStudents();
-    }
   }
 
   handleEditGrades(cell, row) {
     const modalProps = {
-      handleClose: this.handleStudentModalClose,
+      handleClose: this.handleModalClose,
       handleSetGrade: this.handleSetGrade,
       setFullGrade: true,
       currentGrade: row.examGrade,
@@ -327,7 +328,7 @@ export default class ExamStudentsTable extends Component {
     function editGradesButtonFormatter(cell, row){
       return (
         <div>
-            <Button className="action-button" onClick={() => handleEditGrades(cell,row)}>
+            <Button disabled={row.approvedExam !== 1} className="action-button" onClick={() => handleEditGrades(cell,row)}>
                 <Glyphicon glyph="pencil" />&nbsp;
             </Button>
         </div>
@@ -337,6 +338,8 @@ export default class ExamStudentsTable extends Component {
     return (
       <div>
         {this.state.setGradeModal}
+
+        {this.state.confirmModal}
 
         <ToastContainer
           ref={ref => container = ref}

@@ -11,13 +11,11 @@ export default class SetGradeModal extends Component {
       this.state = {
         show: true,
         grade: this.props.modalProps.currentGrade,
-        showFullGrade: false,
         fullGrade: this.props.modalProps.currentFullGrade
       };
 
       this.handleGradeChange = this.handleGradeChange.bind(this);
       this.handleFullGradeChange = this.handleFullGradeChange.bind(this);
-      this.enableFullGrade = this.enableFullGrade.bind(this);
     }
 
     handleGradeChange(e) {
@@ -26,10 +24,6 @@ export default class SetGradeModal extends Component {
 
     handleFullGradeChange(e) {
       this.setState({ fullGrade: e.value });
-    }
-
-    enableFullGrade() {
-      this.setState({ showFullGrade: true });
     }
   
     render() {
@@ -65,13 +59,7 @@ export default class SetGradeModal extends Component {
                             options={possibleGrades}
                         />
                     </div>
-                    {this.props.modalProps.setFullGrade && !this.state.showFullGrade && this.props.modalProps.currentFullGrade === null
-                      ? <div className="teachers-modal-main-item center-item extra-grade">
-                            <Button onClick={this.enableFullGrade}>Asignar Nota de Cierre</Button>
-                        </div>
-                      : <div />
-                    }
-                    {(this.props.modalProps.setFullGrade && this.state.showFullGrade) || this.props.modalProps.currentFullGrade !== null
+                    {this.props.modalProps.setFullGrade || this.props.modalProps.currentFullGrade !== null
                       ? <div className="teachers-modal-main-item subFlex extra-grade">
                             <p className="subFlexItem">Ingrese la nota de cierre del alumno:</p>
                             <Select
@@ -91,8 +79,8 @@ export default class SetGradeModal extends Component {
             <Modal.Footer>
                 <div className="footerFlex">
                     {this.props.modalProps.setFullGrade
-                      ? <Button onClick={() => this.props.modalProps.handleSetGrade(this.state.grade, this.state.fullGrade, this.props.modalProps.studentInfo.studentID)}>Guardar</Button>
-                      : <Button onClick={() => this.props.modalProps.handleSetGrade(this.state.grade, this.props.modalProps.studentInfo.studentID)}>Guardar</Button>
+                      ? <Button disabled={this.state.grade === null || this.state.fullGrade === null} onClick={() => this.props.modalProps.handleSetGrade(this.state.grade, this.state.fullGrade, this.props.modalProps.studentInfo.studentID)}>Guardar</Button>
+                      : <Button disabled={this.state.grade === null} onClick={() => this.props.modalProps.handleSetGrade(this.state.grade, this.props.modalProps.studentInfo.studentID)}>Guardar</Button>
                     }
                     <Button onClick={this.props.modalProps.handleClose}>Cancelar</Button>
                 </div>

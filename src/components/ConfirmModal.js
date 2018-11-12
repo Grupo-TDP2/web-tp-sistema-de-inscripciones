@@ -14,6 +14,25 @@ export default class ConfirmModal extends Component {
   
     render() {
 
+      let confirmButton;
+      switch(this.props.modalProps.type) {
+        case 'confirmDelete':
+          confirmButton =
+            <Button bsStyle="danger" onClick={this.props.modalProps.handleConfirmAction}>
+              <Glyphicon glyph="trash" /> Eliminar
+            </Button>;
+        break;
+        case 'confirmDisapproval':
+          confirmButton = 
+            <Button bsStyle="danger" onClick={this.props.modalProps.handleConfirmAction}>
+              <Glyphicon glyph="thumbs-down" /> Desaprobar
+            </Button>;
+          break;
+        default:
+          confirmButton = <div />;
+          break;
+      }
+
       return (
         <div>
           <Modal show={this.state.show} onHide={this.props.modalProps.handleClose}>
@@ -27,12 +46,7 @@ export default class ConfirmModal extends Component {
             </Modal.Body>
             <Modal.Footer>
                 <div className="footerFlex">
-                    {this.props.modalProps.type === 'confirmDelete'
-                    ? <Button bsStyle="danger" onClick={this.props.modalProps.handleConfirmAction}>
-                        <Glyphicon glyph="trash" /> Eliminar
-                        </Button>
-                    : <Button onClick={this.props.modalProps.handleConfirmAction}>Confirmar</Button>
-                    }
+                    {confirmButton}
                     <Button onClick={this.props.modalProps.handleClose}>Cancelar</Button>
                 </div>
             </Modal.Footer>
