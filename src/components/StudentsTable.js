@@ -54,7 +54,8 @@ export default class StudentsTable extends Component {
               studentID: student.id,
               name: student.student.last_name + ', ' + student.student.first_name,
               studentNumber: student.student.school_document_number,
-              grade: student.partial_qualification
+              grade: student.partial_qualification,
+              examGrade: student.final_qualification
             }
 
             if (student.type === 'normal') {
@@ -272,7 +273,8 @@ export default class StudentsTable extends Component {
             <TableHeaderColumn dataField='status' width='160' headerAlign='center' dataAlign='center'>Condición</TableHeaderColumn>
             <TableHeaderColumn dataField="button" width='100' headerAlign='center' dataAlign='center' dataFormat={buttonFormatter}>Acciones</TableHeaderColumn>
             <TableHeaderColumn dataField='approved' width='210' headerAlign='center' dataAlign='center' dataFormat={(cell, row) => approvedCheckboxFormatter(cell, row)}>Aprobado</TableHeaderColumn>
-            <TableHeaderColumn dataField='grade' dataSort={ true } width='90' headerAlign='center' dataAlign='center'>Nota</TableHeaderColumn>
+            <TableHeaderColumn dataField='grade' dataSort={ true } width='80' headerAlign='center' dataAlign='center'>Nota</TableHeaderColumn>
+            <TableHeaderColumn dataField='examGrade' dataSort={ true } width='100' headerAlign='center' dataAlign='center'>Nota Final</TableHeaderColumn>
         </BootstrapTable>
       </div>
     );
