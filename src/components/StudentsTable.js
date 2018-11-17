@@ -124,7 +124,7 @@ export default class StudentsTable extends Component {
 
     let mURL;
 
-    if (this.props.childProps.role === "Admin") {
+    if (this.props.childProps.role === "Admin" || this.props.childProps.role === "DepartmentStaff") {
       mURL = "/departments/" + this.props.childProps.departmentID + "/courses/" + this.props.childProps.courseID + "/enrolments/" + studentID;
     } else {
       mURL = "/teachers/me/courses/" + this.props.childProps.courseID + "/enrolments/" + studentID;
@@ -174,7 +174,7 @@ export default class StudentsTable extends Component {
 
       let mURL;
 
-      if (this.props.childProps.role === "Admin") {
+      if (this.props.childProps.role === "Admin" || this.props.childProps.role === "DepartmentStaff") {
         mURL = "/departments/" + this.props.childProps.departmentID + "/courses/" + this.props.childProps.courseID + "/enrolments/" + row.studentID;
       } else {
         mURL = "/teachers/me/courses/" + this.props.childProps.courseID + "/enrolments/" + row.studentID;
