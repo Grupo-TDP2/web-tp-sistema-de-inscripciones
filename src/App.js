@@ -1,7 +1,7 @@
 import React, { Component, Fragment } from "react";
 import { LinkContainer } from "react-router-bootstrap";
 import { Link, withRouter } from "react-router-dom";
-import { Nav, Navbar, NavItem, Glyphicon } from "react-bootstrap";
+import { Nav, Navbar, NavItem, NavDropdown, MenuItem, Glyphicon } from "react-bootstrap";
 import Routes from "./Routes";
 import "./App.css";
 
@@ -101,6 +101,12 @@ class App extends Component {
                   <LinkContainer to="/importData" activeClassName="">
                     <NavItem>Carga de Datos</NavItem>
                   </LinkContainer>
+                  <NavDropdown eventKey={3} title="Reportes" id="report-dropdown">
+                    <LinkContainer to="/pollReport" activeClassName="">
+                      <MenuItem eventKey={3.1}>Encuestas</MenuItem>
+                    </LinkContainer>
+                    <MenuItem eventKey={3.2}>Alumnos / Docentes</MenuItem>
+                  </NavDropdown>
                 </Fragment>
               : <Fragment/>
             }
