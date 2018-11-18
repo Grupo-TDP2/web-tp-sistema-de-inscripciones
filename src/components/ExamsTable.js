@@ -263,14 +263,6 @@ export default class ExamsTable extends Component {
       date_time: this.state.newDate.format('YYYY-MM-DD') + " " + this.state.newHour
     };
 
-    let mURL;
-
-    if (this.props.childProps.role === "Admin" || this.props.childProps.role === "DepartmentStaff") {
-      mURL = "/departments/" + this.props.childProps.departmentID + "/courses/" + this.props.childProps.courseID + "/exams";
-    } else {
-      mURL = '/teachers/me/courses/' + this.props.childProps.courseID + '/exams';
-    }
-
     await axios({
       method:'post',
       data: {

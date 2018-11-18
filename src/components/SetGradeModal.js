@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import {Modal, Button, Table} from 'react-bootstrap';
+import {Modal, Button} from 'react-bootstrap';
 import Select from 'react-select';
 import './TeachersModal.css';
 import './SetGradeModal.css';

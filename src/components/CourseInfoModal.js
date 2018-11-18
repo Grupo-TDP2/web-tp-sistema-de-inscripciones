@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import {Modal, Button, Glyphicon, Table, Row, Col, FormControl} from 'react-bootstrap';
+import {Modal, Button, Glyphicon, Table, FormControl} from 'react-bootstrap';
 import './CourseInfoModal.css';
 import './TeachersModal.css';
 import Select from 'react-select';
@@ -329,7 +329,6 @@ export default class CourseInfoModal extends Component {
 
     render() {
 
-        const daysList = this.daysList;
         const handleRemoveSchedule = this.handleRemoveSchedule;
         const handleRemoveTeacher = this.handleRemoveTeacher;
 

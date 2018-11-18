@@ -5,6 +5,8 @@ import API_URI from "../config/GeneralConfig.js";
 import axios from 'axios';
 import { ToastContainer } from "react-toastr";
 import "../components/Toastr.css";
+import HorizontalBarChart from "../components/HorizontalBarChart";
+import CommentSection from "../components/CommentSection";
 
 import "./PollReport.css";
 
@@ -19,7 +21,68 @@ export default class PollReport extends Component {
         departmentList: [],
         departmentID: "",
         schoolTermList: [],
-        schoolTermID: ""
+        schoolTermID: "",
+        /*polls: [
+          {
+            subject: "Taller de Desarrollo de Programación 2",
+            course: "003",
+            mean_rate: 3,
+            comments: [
+              {
+                poll_id: 13,
+                comment: "La materia no era muy buena.",
+                date: "2018-11-18T07:05:33.661Z"
+              },
+              {
+                poll_id: 16,
+                comment: "Los profesores sabían mucho del tema y tenían mucha facilidad para explicar.",
+                date: "2018-11-18T07:05:33.661Z"
+              },
+              {
+                poll_id: 18,
+                comment: "No me parecio muy útil.",
+                date: "2018-11-18T07:05:33.661Z"
+              },
+              {
+                poll_id: 23,
+                comment: "El profesor de la teoríca es muy aburrido y los de la práctica no saben nada.",
+                date: "2018-11-18T07:05:33.661Z"
+              }
+            ]
+          },
+          {
+            subject: "Taller de Desarrollo de Programación 2",
+            course: "005",
+            mean_rate: 8,
+            comments: []
+          },
+          {
+            subject: "Fisica 2",
+            course: "008",
+            mean_rate: 6,
+            comments: []
+          },
+          {
+            subject: "Analisis Matemático 2",
+            course: "1234",
+            mean_rate: 1,
+            comments: []
+          },
+          {
+            subject: "Taller de Desarrollo de Programación 2",
+            course: "018",
+            mean_rate: 10,
+            comments: []
+          },
+          {
+            subject: "Fisica 3",
+            course: "024",
+            mean_rate: 8,
+            comments: []
+          }
+        ],*/
+        polls: [],
+        comments: []
     };
 
     if (!this.props.isAuthenticated) {
@@ -30,6 +93,7 @@ export default class PollReport extends Component {
     this.loadReport = this.loadReport.bind(this);
     this.handleTermChange = this.handleTermChange.bind(this);
     this.handleDepartmentChange = this.handleDepartmentChange.bind(this);
+    this.handleCourseClick = this.handleCourseClick.bind(this);
   }
 
   async componentDidMount() {
@@ -107,6 +171,7 @@ export default class PollReport extends Component {
 
   async loadReport(departmentID, schoolTermID) {
     const errorToastr = message => this.displayErrorToastr(message);
+    const setPolls = mPolls => this.setState({ polls: mPolls });
 
     await axios({
         method:'get',
@@ -114,11 +179,12 @@ export default class PollReport extends Component {
         headers: {'Authorization': this.props.token}
         })
             .then(function(response) {
-            console.log(response);
+              console.log(response);
+              setPolls(response.data);
             })
             .catch(function (error) {
-            console.log(error);
-            errorToastr("No se pudieron cargar los datos.");
+              console.log(error);
+              errorToastr("No se pudieron cargar los datos.");
             });
   }
 
@@ -140,11 +206,71 @@ export default class PollReport extends Component {
       );
   }
 
+  handleCourseClick(elems) {
+    this.setState({ comments: this.state.polls.sort((a,b) => b.mean_rate - a.mean_rate)[elems[0]._index].comments });
+  }
+
   render() {
-    const childProps = {
-      token: this.props.token,
-      handleLogout: this.props.handleLogout
+    const chartColors = {
+      "red": {
+        "background": 'rgba(210,3,44,0.2)',
+        "border": 'rgba(210,3,44,1)',
+        "hoverBackground": 'rgba(210,3,44,0.4)',
+        "hoverBorder": 'rgba(210,3,44,1)'
+      },
+      "yellow": {
+        "background": 'rgba(207,210,3,0.2)',
+        "border": 'rgba(207,210,3,1)',
+        "hoverBackground": 'rgba(207,210,3,0.4)',
+        "hoverBorder": 'rgba(207,210,3,1)'
+      },
+      "green": {
+        "background": 'rgba(13,210,3,0.2)',
+        "border": 'rgba(13,210,3,1)',
+        "hoverBackground": 'rgba(13,210,3,0.4)',
+        "hoverBorder": 'rgba(13,210,3,1)'
+      }
+    }
+
+    const setColor = (meanRate, type) => {
+      if (meanRate < 5) {
+        return chartColors["red"][type];
+      } else if (meanRate >= 5 && meanRate < 7) {
+        return chartColors["yellow"][type];
+      } else {
+        return chartColors["green"][type];
+      }
     };
+
+    const mData = {
+        labels: this.state.polls.sort((a,b) => b.mean_rate - a.mean_rate).map(poll => poll.course + " - " + poll.subject),
+        datasets: [
+            {
+            label: "Puntuación promedio (Curso)",
+            backgroundColor: this.state.polls.sort((a,b) => b.mean_rate - a.mean_rate).map(poll => setColor(poll.mean_rate, "background")),
+            borderColor: this.state.polls.sort((a,b) => b.mean_rate - a.mean_rate).map(poll => setColor(poll.mean_rate, "border")),
+            borderWidth: 1,
+            hoverBackgroundColor: this.state.polls.sort((a,b) => b.mean_rate - a.mean_rate).map(poll => setColor(poll.mean_rate, "hoverBackground")),
+            hoverBorderColor: this.state.polls.sort((a,b) => b.mean_rate - a.mean_rate).map(poll => setColor(poll.mean_rate, "hoverBorder")),
+            data: this.state.polls.sort((a,b) => b.mean_rate - a.mean_rate).map(poll => poll.mean_rate)
+            }
+        ]
+    };
+
+    const barChartProps = {
+      chartData: mData,
+      handleCourseClick: this.handleCourseClick
+    };
+
+    const commentSectionProps = {
+      comments: this.state.comments.map(commentElement => { 
+        return {
+          commentID: commentElement.poll_id,
+          comment: commentElement.comment,
+          date: commentElement.date
+        }
+      })
+    }
 
     return (
       this.props.isAuthenticated &&
@@ -153,7 +279,6 @@ export default class PollReport extends Component {
           ref={ref => container = ref}
           className="toast-top-right"
         />
-
 
         <Row>
             <Col xs={12} md={4}>
@@ -183,12 +308,21 @@ export default class PollReport extends Component {
                         placeholder="Seleccione un período lectivo..."
                         noOptionsMessage={() => "No hay opciones."}
                         onChange={this.handleTermChange}
-                        defaultValue={this.state.schoolTermList.find(schoolTerm => schoolTerm.value === this.state.schoolTermID)}
+                        defaultValue={this.state.schoolTermList[this.state.schoolTermList.findIndex(schoolTerm => schoolTerm.value === this.state.schoolTermID)]}
                         name="name"
                         options={this.state.schoolTermList}
                     />
                 </div>
             </Col>
+        </Row>
+        <br />
+        <Row>
+          <Col xs={12} md={7}>
+            <HorizontalBarChart barChartProps={barChartProps} />
+          </Col>
+          <Col xs={12} md={5}>
+            <CommentSection commentSectionProps={commentSectionProps} />
+          </Col>
         </Row>
       </div>
     );

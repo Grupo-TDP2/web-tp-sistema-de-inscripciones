@@ -1,0 +1,14 @@
+.commentCard {
+    margin-bottom: 15px;
+}
+
+.commentCard .dateTitle {
+    float: right;
+    font-size: 12px;
+}
+
+.commentCard .comment {
+    font-size: 16px;
+    margin: 10px 120px 5px 5px;
+    font-style: italic;
+}

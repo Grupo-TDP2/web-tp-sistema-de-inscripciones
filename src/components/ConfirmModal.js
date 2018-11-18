@@ -1,6 +1,5 @@
 import React, { Component } from "react";
-import {Modal, Button, Table, Glyphicon} from 'react-bootstrap';
-import Select from 'react-select';
+import {Modal, Button, Glyphicon} from 'react-bootstrap';
 import './TeachersModal.css';
 
 export default class ConfirmModal extends Component {

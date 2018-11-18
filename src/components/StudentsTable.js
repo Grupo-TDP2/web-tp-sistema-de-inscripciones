@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import { Redirect } from 'react-router-dom';
 import {BootstrapTable, TableHeaderColumn} from 'react-bootstrap-table';
 import axios from 'axios'
-import {Glyphicon, Button, ToggleButton, ToggleButtonGroup} from 'react-bootstrap';
+import {Glyphicon, Button} from 'react-bootstrap';
 import { ToastContainer } from "react-toastr";
 import "./Toastr.css";
 import API_URI from "../config/GeneralConfig.js";

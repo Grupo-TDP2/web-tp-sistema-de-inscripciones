@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import { Redirect } from 'react-router-dom';
 import {BootstrapTable, TableHeaderColumn} from 'react-bootstrap-table';
 import axios from 'axios'
-import {Glyphicon, Button, ToggleButton, ToggleButtonGroup} from 'react-bootstrap';
+import {Glyphicon, Button} from 'react-bootstrap';
 import { ToastContainer } from "react-toastr";
 import "./Toastr.css";
 import "./CoursesTable.css";
@@ -39,10 +39,6 @@ export default class CoursesTable extends Component {
 
   async componentDidMount() {
     let mTeacherID = "me";
-
-    const errorToastr = message => this.displayErrorToastr(message);
-    const setLoaderMsg = mLoaderMsg => this.setState({ loaderMsg: mLoaderMsg });
-    const setCourses = mCourses => this.setState({courses: mCourses});
 
     if (this.props.childProps.role === "Admin" || this.props.childProps.role === "DepartmentStaff") {
       const setTeachers = (mTeachers, mTeacherID) => this.setState({ teacherList: mTeachers, teacherID: mTeacherID });
