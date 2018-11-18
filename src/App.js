@@ -82,7 +82,10 @@ class App extends Component {
             {this.state.isAuthenticated && this.state.role === 'DepartmentStaff'
               ? <Fragment>
                   <LinkContainer to="/departmentCourses" activeClassName="">
-                    <NavItem>Cursos</NavItem>
+                    <NavItem>Cursos - Departamento</NavItem>
+                  </LinkContainer>
+                  <LinkContainer to="/teacherCourses" activeClassName="">
+                    <NavItem>Cursos - Docente</NavItem>
                   </LinkContainer>
                 </Fragment>
               : <Fragment/>
