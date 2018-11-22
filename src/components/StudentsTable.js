@@ -72,6 +72,12 @@ export default class StudentsTable extends Component {
               mStudent.approved = 2;
             }
 
+            if (student.exam_qualification !== null) {
+              mStudent.examGrade = student.exam_qualification.qualification;
+            } else {
+              mStudent.examGrade = "";
+            }
+
             mStudents.push(mStudent);
           });
 
@@ -269,11 +275,12 @@ export default class StudentsTable extends Component {
                     headerStyle={ { background: '#f8f8f8' } } pagination={ true } search={ true } searchPlaceholder={'Buscar'}>
             <TableHeaderColumn dataField='studentID' hidden={ true } width='80' isKey={ true } headerAlign='center' dataAlign='center'>ID Alumno</TableHeaderColumn>
             <TableHeaderColumn dataField='name' dataSort={ true } headerAlign='center' dataAlign='center'>Nombre</TableHeaderColumn>
-            <TableHeaderColumn dataField='studentNumber' dataSort={ true } width='180' headerAlign='center' dataAlign='center'>Padron</TableHeaderColumn>
-            <TableHeaderColumn dataField='status' width='160' headerAlign='center' dataAlign='center'>Condición</TableHeaderColumn>
+            <TableHeaderColumn dataField='studentNumber' dataSort={ true } width='100' headerAlign='center' dataAlign='center'>Padron</TableHeaderColumn>
+            <TableHeaderColumn dataField='status' width='100' headerAlign='center' dataAlign='center'>Condición</TableHeaderColumn>
             <TableHeaderColumn dataField="button" width='100' headerAlign='center' dataAlign='center' dataFormat={buttonFormatter}>Acciones</TableHeaderColumn>
             <TableHeaderColumn dataField='approved' width='210' headerAlign='center' dataAlign='center' dataFormat={(cell, row) => approvedCheckboxFormatter(cell, row)}>Aprobado</TableHeaderColumn>
-            <TableHeaderColumn dataField='grade' dataSort={ true } width='80' headerAlign='center' dataAlign='center'>Nota</TableHeaderColumn>
+            <TableHeaderColumn dataField='grade' dataSort={ true } width='120' headerAlign='center' dataAlign='center'>Nota Cursada</TableHeaderColumn>
+            <TableHeaderColumn dataField='examGrade' dataSort={ true } width='120' headerAlign='center' dataAlign='center'>Nota Examen</TableHeaderColumn>
             <TableHeaderColumn dataField='finalGrade' dataSort={ true } width='100' headerAlign='center' dataAlign='center'>Nota Cierre</TableHeaderColumn>
         </BootstrapTable>
       </div>
