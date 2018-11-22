@@ -108,7 +108,9 @@ class App extends Component {
                     <LinkContainer to="/pollReport" activeClassName="">
                       <MenuItem eventKey={3.1}>Encuestas</MenuItem>
                     </LinkContainer>
-                    <MenuItem eventKey={3.2}>Alumnos / Docentes</MenuItem>
+                    <LinkContainer to="/subjectReport" activeClassName="">
+                      <MenuItem eventKey={3.2}>Alumnos / Docentes</MenuItem>
+                    </LinkContainer>
                   </NavDropdown>
                 </Fragment>
               : <Fragment/>

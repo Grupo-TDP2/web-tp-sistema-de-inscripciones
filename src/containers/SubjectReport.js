@@ -5,12 +5,29 @@ import API_URI from "../config/GeneralConfig.js";
 import axios from 'axios';
 import { ToastContainer } from "react-toastr";
 import "../components/Toastr.css";
-import HorizontalBarChart from "../components/HorizontalBarChart";
-import CommentSection from "../components/CommentSection";
+import PieChart from "../components/PieChart";
+import ChartInfo from "../components/ChartInfo";
 
-import "./PollReport.css";
+import "./SubjectReport.css";
 
 let container;
+
+function setChartColors(array) {
+    return array.map(element => {
+        const r = Math.floor(Math.random() * 200);
+        const g = Math.floor(Math.random() * 200);
+        const b = Math.floor(Math.random() * 200);
+
+        const color = 'rgb(' + r + ', ' + g + ', ' + b + ', ';
+
+        return {
+            "background": color + '0.2)',
+            "border": color + '1)',
+            "hoverBackground": color + '0.4)',
+            "hoverBorder": color + '1)'
+        };  
+    })
+}
 
 export default class PollReport extends Component {
 
@@ -22,8 +39,10 @@ export default class PollReport extends Component {
         departmentID: "",
         schoolTermList: [],
         schoolTermID: "",
-        polls: [],
-        comments: []
+        reportData: [],
+        subjectInfo: {},
+        subjectChartData: {},
+        courseInfo: {}
     };
 
     if (!this.props.isAuthenticated) {
@@ -34,6 +53,7 @@ export default class PollReport extends Component {
     this.loadReport = this.loadReport.bind(this);
     this.handleTermChange = this.handleTermChange.bind(this);
     this.handleDepartmentChange = this.handleDepartmentChange.bind(this);
+    this.handleSubjectClick = this.handleSubjectClick.bind(this);
     this.handleCourseClick = this.handleCourseClick.bind(this);
   }
 
@@ -112,16 +132,16 @@ export default class PollReport extends Component {
 
   async loadReport(departmentID, schoolTermID) {
     const errorToastr = message => this.displayErrorToastr(message);
-    const setPolls = mPolls => this.setState({ polls: mPolls, comments: [] });
+    const setReportData = mReportData => this.setState({ reportData: mReportData, subjectInfo: {}, subjectChartData: {}, courseInfo: {} });
 
     await axios({
         method:'get',
-        url: API_URI + "/reports/polls?department_id=" + departmentID + "&school_term_id=" + schoolTermID,
+        url: API_URI + "/reports/subject_enrolments?department_id=" + departmentID + "&school_term_id=" + schoolTermID,
         headers: {'Authorization': this.props.token}
         })
             .then(function(response) {
               console.log(response);
-              setPolls(response.data);
+              setReportData(response.data);
             })
             .catch(function (error) {
               console.log(error);
@@ -147,71 +167,105 @@ export default class PollReport extends Component {
       );
   }
 
+  handleSubjectClick(elems) {
+    const subject = this.state.reportData[elems[0]._index];
+
+    const chartColors = setChartColors(subject.courses);
+
+    this.setState({ 
+        subjectChartData: {
+            labels: subject.courses.map(course => course.course),
+            datasets: [
+                {
+                label: "Inscriptos (Curso)",
+                backgroundColor: chartColors.map(color => color["background"]),
+                borderColor: chartColors.map(color => color["border"]),
+                borderWidth: 1,
+                hoverBackgroundColor: chartColors.map(color => color["hoverBackground"]),
+                hoverBorderColor: chartColors.map(color => color["hoverBorder"]),
+                data: subject.courses.map(course => course.enrolments)
+                }
+            ]
+        },
+        subjectInfo: {
+            name: subject.subject,
+            enrolments: "Inscriptos: " + subject.enrolments,
+            teachers: "Docentes: " + subject.teachers,
+            coursesQuantity: "Cursos: " + subject.courses.length,
+            courses: subject.courses
+        },
+        courseInfo: {}
+    });
+  }
+
   handleCourseClick(elems) {
-    this.setState({ comments: this.state.polls.sort((a,b) => b.mean_rate - a.mean_rate)[elems[0]._index].comments });
+    this.setState({ courseInfo: {
+        course: this.state.subjectInfo.courses[elems[0]._index].course,
+        enrolments: "Inscriptos: " + this.state.subjectInfo.courses[elems[0]._index].enrolments,
+        teachersTitle: "Docentes: ",
+        teachers: this.state.subjectInfo.courses[elems[0]._index].teachers
+    }});
   }
 
   render() {
-    const chartColors = {
-      "red": {
-        "background": 'rgba(210,3,44,0.2)',
-        "border": 'rgba(210,3,44,1)',
-        "hoverBackground": 'rgba(210,3,44,0.4)',
-        "hoverBorder": 'rgba(210,3,44,1)'
-      },
-      "yellow": {
-        "background": 'rgba(207,210,3,0.2)',
-        "border": 'rgba(207,210,3,1)',
-        "hoverBackground": 'rgba(207,210,3,0.4)',
-        "hoverBorder": 'rgba(207,210,3,1)'
-      },
-      "green": {
-        "background": 'rgba(13,210,3,0.2)',
-        "border": 'rgba(13,210,3,1)',
-        "hoverBackground": 'rgba(13,210,3,0.4)',
-        "hoverBorder": 'rgba(13,210,3,1)'
-      }
-    }
 
-    const setColor = (meanRate, type) => {
-      if (meanRate < 5) {
-        return chartColors["red"][type];
-      } else if (meanRate >= 5 && meanRate < 7) {
-        return chartColors["yellow"][type];
-      } else {
-        return chartColors["green"][type];
-      }
-    };
+    const chartColors = setChartColors(this.state.reportData);
 
     const mData = {
-        labels: this.state.polls.sort((a,b) => b.mean_rate - a.mean_rate).map(poll => poll.course + " - " + poll.subject),
+        labels: this.state.reportData.map(subject => subject.subject),
         datasets: [
             {
-            label: "Puntuación promedio (Curso)",
-            backgroundColor: this.state.polls.sort((a,b) => b.mean_rate - a.mean_rate).map(poll => setColor(poll.mean_rate, "background")),
-            borderColor: this.state.polls.sort((a,b) => b.mean_rate - a.mean_rate).map(poll => setColor(poll.mean_rate, "border")),
+            label: "Inscriptos (Materia)",
+            backgroundColor: chartColors.map(color => color["background"]),
+            borderColor: chartColors.map(color => color["border"]),
             borderWidth: 1,
-            hoverBackgroundColor: this.state.polls.sort((a,b) => b.mean_rate - a.mean_rate).map(poll => setColor(poll.mean_rate, "hoverBackground")),
-            hoverBorderColor: this.state.polls.sort((a,b) => b.mean_rate - a.mean_rate).map(poll => setColor(poll.mean_rate, "hoverBorder")),
-            data: this.state.polls.sort((a,b) => b.mean_rate - a.mean_rate).map(poll => poll.mean_rate)
+            hoverBackgroundColor: chartColors.map(color => color["hoverBackground"]),
+            hoverBorderColor: chartColors.map(color => color["hoverBorder"]),
+            data: this.state.reportData.map(subject => subject.enrolments)
             }
         ]
     };
 
-    const barChartProps = {
-      chartData: mData,
-      handleCourseClick: this.handleCourseClick
+    const chartProps = {
+        chartData: mData,
+        handleElementClick: this.handleSubjectClick
     };
 
-    const commentSectionProps = {
-      comments: this.state.comments.map(commentElement => { 
-        return {
-          commentID: commentElement.poll_id,
-          comment: commentElement.comment,
-          date: commentElement.date
-        }
-      })
+    const subChartProps = {
+        chartData: this.state.subjectChartData,
+        handleElementClick: this.handleCourseClick
+    };
+
+    let courseTeacherList = <div />
+    if (this.state.courseInfo.teachers !== undefined) {
+        courseTeacherList = this.state.courseInfo.teachers.map(function(teacher) {
+            return (
+            <li key={teacher.id}>
+                {teacher.first_name + " " + teacher.last_name}
+            </li>
+            );
+        });
+    }  
+
+    const subjectInfoProps = {
+        title: this.state.subjectInfo.name,
+        elements: [
+            <h5 key="1">{this.state.subjectInfo.enrolments}</h5>,
+            <h5 key="2">{this.state.subjectInfo.teachers}</h5>,
+            <h5 key="3">{this.state.subjectInfo.coursesQuantity}</h5>
+        ]
     }
+
+    const courseInfoProps = {
+        title: this.state.courseInfo.course,
+        elements: [
+            <h5 key="1">{this.state.courseInfo.enrolments}</h5>,
+            <h5 key="2">{this.state.courseInfo.teachersTitle}</h5>,
+            <ul key="3">
+                {courseTeacherList}
+            </ul>
+        ]
+    };
 
     return (
       this.props.isAuthenticated &&
@@ -225,7 +279,7 @@ export default class PollReport extends Component {
             <Col xs={12} md={4}>
                 <div className="titleFlex">
                     <h1 className="mainTitle">Reporte</h1>
-                    <h3 className="subtitle">Encuestas</h3>
+                    <h3 className="subtitle">Materias / Cursos</h3>
                 </div>
             </Col>
             <Col xs={12} md={4}>
@@ -257,12 +311,24 @@ export default class PollReport extends Component {
             </Col>
         </Row>
         <br />
-        <Row>
-          <Col xs={12} md={7}>
-            <HorizontalBarChart barChartProps={barChartProps} />
+        <Row className="chartRow">
+          <Col xs={12} md={4}>
+            <PieChart chartProps={chartProps} />
           </Col>
-          <Col xs={12} md={5}>
-            <CommentSection commentSectionProps={commentSectionProps} />
+          <Col xs={12} md={2}>
+            {this.state.subjectInfo !== {}
+            ? <ChartInfo infoProps={subjectInfoProps} />
+            : <div />
+            }
+          </Col>
+          <Col xs={12} md={4}>
+            <PieChart chartProps={subChartProps} />
+          </Col>
+          <Col xs={12} md={2}>
+            {this.state.courseInfo !== {}
+            ? <ChartInfo infoProps={courseInfoProps} />
+            : <div />
+            }
           </Col>
         </Row>
       </div>
