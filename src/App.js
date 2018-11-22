@@ -14,7 +14,8 @@ class App extends Component {
       isAuthenticated: false,
       isAuthenticating: true,
       token: null,
-      role: null
+      role: null,
+      departmentID: null
     };
   }
 
@@ -22,31 +23,35 @@ class App extends Component {
     const authenticated = localStorage.getItem('isAuthenticated');
     const storedToken = localStorage.getItem('token');
     const storedRole = localStorage.getItem('role');
+    const storedDepartmentID = localStorage.getItem('departmentID');
 
     if (authenticated === "true") {
       this.setState({
         isAuthenticated: true,
         token: storedToken,
-        role: storedRole
+        role: storedRole,
+        departmentID: storedDepartmentID
       });
     }
 
     this.setState({ isAuthenticating: false });
   }
   
-  userHasAuthenticated = (authenticated, token, role) => {
+  userHasAuthenticated = (authenticated, token, role, departmentID) => {
     this.setState({ 
       isAuthenticated: authenticated,
       token: token,
-      role: role
+      role: role,
+      departmentID: departmentID
     });
     localStorage.setItem('isAuthenticated', authenticated);
     localStorage.setItem('token', token);
     localStorage.setItem('role', role);
+    localStorage.setItem('departmentID', departmentID);
   }
 
   handleLogout = event => {
-    this.userHasAuthenticated(false, null, null);
+    this.userHasAuthenticated(false, null, null, null);
     this.props.history.push("/login");
   }
 
@@ -55,6 +60,7 @@ class App extends Component {
       isAuthenticated: this.state.isAuthenticated,
       token: this.state.token,
       role: this.state.role,
+      departmentID: this.state.departmentID,
       userHasAuthenticated: this.userHasAuthenticated,
       handleLogout: this.handleLogout
     };
@@ -87,6 +93,14 @@ class App extends Component {
                   <LinkContainer to="/teacherCourses" activeClassName="">
                     <NavItem>Cursos - Docente</NavItem>
                   </LinkContainer>
+                  <NavDropdown eventKey={3} title="Reportes" id="report-dropdown">
+                    <LinkContainer to="/pollReport" activeClassName="">
+                      <MenuItem eventKey={3.1}>Encuestas</MenuItem>
+                    </LinkContainer>
+                    <LinkContainer to="/subjectReport" activeClassName="">
+                      <MenuItem eventKey={3.2}>Alumnos / Docentes</MenuItem>
+                    </LinkContainer>
+                  </NavDropdown>
                 </Fragment>
               : <Fragment/>
             }

@@ -45,33 +45,38 @@ export default class PollReport extends Component {
     let mDepartmentID;
     let mSchoolTermID;
 
-    await axios({
-      method:'get',
-      url: API_URI + '/departments',
-      headers: {'Authorization': this.props.token}
-      })
-        .then(function(response) {
-          console.log(response);
-
-          let mDepartments = [];
-
-          response.data.forEach(department => {
-            mDepartments.push({
-              label: department.name,
-              value: department.id
-            });
-          });
-
-          if (mDepartments.length > 0) {
-            mDepartmentID = mDepartments[0].value;
-          }
-
-          setDepartments(mDepartments, mDepartmentID);
+    if (this.props.role === "Admin") {
+      await axios({
+        method:'get',
+        url: API_URI + '/departments',
+        headers: {'Authorization': this.props.token}
         })
-        .catch(function (error) {
-          console.log(error);
-          errorToastr("No se pudieron cargar los datos.");
-        });
+          .then(function(response) {
+            console.log(response);
+
+            let mDepartments = [];
+
+            response.data.forEach(department => {
+              mDepartments.push({
+                label: department.name,
+                value: department.id
+              });
+            });
+
+            if (mDepartments.length > 0) {
+              mDepartmentID = mDepartments[0].value;
+            }
+
+            setDepartments(mDepartments, mDepartmentID);
+          })
+          .catch(function (error) {
+            console.log(error);
+            errorToastr("No se pudieron cargar los datos.");
+          });
+    } else {
+      mDepartmentID = this.props.departmentID;
+      this.setState({ departmentID: mDepartmentID });
+    }
 
     await axios({
         method:'get',
@@ -229,7 +234,8 @@ export default class PollReport extends Component {
                 </div>
             </Col>
             <Col xs={12} md={4}>
-                <div className="selectFlex">
+              {this.props.role === "Admin"
+                ? <div className="selectFlex">
                     <p><strong>Departamento</strong></p>
                     <Select
                       classNamePrefix="select"
@@ -240,6 +246,8 @@ export default class PollReport extends Component {
                       options={this.state.departmentList}
                     />
                 </div>
+                : <div />
+              }
             </Col>
             <Col xs={12} md={4}>
                 <div className="selectFlex">

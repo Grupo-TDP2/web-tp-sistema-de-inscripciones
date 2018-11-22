@@ -41,7 +41,7 @@ export default class Login extends Component {
   handleSubmit = async event => {
     event.preventDefault();
 
-    const authFunction = (token, role) => this.props.userHasAuthenticated(true, token, role);
+    const authFunction = (token, role, departmentID) => this.props.userHasAuthenticated(true, token, role, departmentID);
     const goToRoute = route => this.props.history.push(route);
     const setIsLoadingFlag = flag => this.setState({ isLoading: flag});
     const errorToastr = message => this.displayErrorToastr(message);
@@ -55,7 +55,13 @@ export default class Login extends Component {
       })
         .then(function (response) {
           setIsLoadingFlag(false);
-          authFunction(response.data.access_token, response.data.role);
+
+          let departmentID = null;
+          if (response.data.role === "DepartmentStaff") {
+            departmentID = response.data.user.department_id;
+          }
+
+          authFunction(response.data.access_token, response.data.role, departmentID);
 
           if (response.data.role === "Teacher") {
             goToRoute("/teacherCourses");
