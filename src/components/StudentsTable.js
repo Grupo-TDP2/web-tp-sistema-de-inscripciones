@@ -32,6 +32,8 @@ export default class StudentsTable extends Component {
     this.handleStudentModalClose = this.handleStudentModalClose.bind(this);
     this.handleSetGrade = this.handleSetGrade.bind(this);
     this.loadStudents = this.loadStudents.bind(this);
+    this.customInsertButton = this.customInsertButton.bind(this);
+    this.handleClickNewStudent = this.handleClickNewStudent.bind(this);
   }
 
   async loadStudents() {
@@ -213,6 +215,19 @@ export default class StudentsTable extends Component {
     }
   }
 
+  customInsertButton() {
+    const handleClickNewStudent = () => this.handleClickNewStudent();
+    return (
+      <Button className="categories-table-button" bsStyle="success" onClick={handleClickNewStudent}>
+        <Glyphicon glyph="plus" /> Inscribir Alumno
+      </Button>
+    );
+  }
+
+  handleClickNewStudent() {
+    console.log("HOLA");
+  }
+
   render() {
     if (this.state.redirect) {
       return <Redirect push to={`${this.state.redirectTo}`} />;
@@ -235,7 +250,8 @@ export default class StudentsTable extends Component {
         } ], // you can change the dropdown list for size per page
         sizePerPage: 10,
         defaultSortName: 'studentID',  // default sort column name
-        defaultSortOrder: 'asc'  // default sort order
+        defaultSortOrder: 'asc',
+        insertBtn: this.customInsertButton
     };
 
     function buttonFormatter(cell, row){
@@ -271,7 +287,7 @@ export default class StudentsTable extends Component {
           ref={ref => container = ref}
           className="toast-top-right"
         />
-        <BootstrapTable ref='coursesTable' data={ this.state.students } options={ options }
+        <BootstrapTable ref='coursesTable' data={ this.state.students } options={ options } insertRow
                     headerStyle={ { background: '#f8f8f8' } } pagination={ true } search={ true } searchPlaceholder={'Buscar'}>
             <TableHeaderColumn dataField='studentID' hidden={ true } width='80' isKey={ true } headerAlign='center' dataAlign='center'>ID Alumno</TableHeaderColumn>
             <TableHeaderColumn dataField='name' dataSort={ true } headerAlign='center' dataAlign='center'>Nombre</TableHeaderColumn>
