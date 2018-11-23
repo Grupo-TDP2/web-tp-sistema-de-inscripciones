@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { Component, Fragment } from "react";
 import { Redirect } from 'react-router-dom';
 import {BootstrapTable, TableHeaderColumn} from 'react-bootstrap-table';
 import axios from 'axios'
@@ -8,6 +8,7 @@ import "./Toastr.css";
 import API_URI from "../config/GeneralConfig.js";
 import SetGradeModal from "./SetGradeModal";
 import OptionsToggle from "./OptionsToggle";
+import ConfirmModal from './ConfirmModal';
 
 let container;
  
@@ -21,15 +22,17 @@ export default class StudentsTable extends Component {
         loaderMsg: 'Cargando la informacion...',
         redirect: false,
         redirectTo: '',
-        setGradeModal: ''
+        setGradeModal: '',
+        confirmModal: ''
     };
 
     this.customTitle = this.customTitle.bind(this);
     this.displayErrorToastr = this.displayErrorToastr.bind(this);
     this.displaySuccessToastr = this.displaySuccessToastr.bind(this);
-    this.handleClick = this.handleClick.bind(this);
+    this.handleClickAcceptStudent = this.handleClickAcceptStudent.bind(this);
+    this.handleAcceptStudent = this.handleAcceptStudent.bind(this);
     this.handleChangeApproval = this.handleChangeApproval.bind(this);
-    this.handleStudentModalClose = this.handleStudentModalClose.bind(this);
+    this.handleModalClose = this.handleModalClose.bind(this);
     this.handleSetGrade = this.handleSetGrade.bind(this);
     this.loadStudents = this.loadStudents.bind(this);
   }
@@ -111,12 +114,8 @@ export default class StudentsTable extends Component {
     return `Doble click para editar`;
   }
 
-  handleClick(cell, row) {
-    this.displayErrorToastr("Funcion habilitada proximamente.")
-  }
-
-  handleStudentModalClose() {
-    this.setState({ setGradeModal: '' });
+  handleModalClose() {
+    this.setState({ setGradeModal: '', confirmModal: '' });
   }
 
   async handleSetGrade(grade, studentID) {
@@ -161,7 +160,7 @@ export default class StudentsTable extends Component {
   async handleChangeApproval(e, row) {
     if (e === 1) {
       const modalProps = {
-        handleClose: this.handleStudentModalClose,
+        handleClose: this.handleModalClose,
         handleSetGrade: this.handleSetGrade,
         setFullGrade: false,
         currentGrade: null,
@@ -213,12 +212,62 @@ export default class StudentsTable extends Component {
     }
   }
 
+  async handleAcceptStudent(row) {
+    const errorToastr = message => this.displayErrorToastr(message);
+    const successToastr = message => this.displaySuccessToastr(message);
+    const handleModalClose = () => this.handleModalClose();
+
+    let mURL;
+
+    if (this.props.childProps.role === "Admin" || this.props.childProps.role === "DepartmentStaff") {
+      mURL = "/departments/" + this.props.childProps.departmentID + "/courses/" + this.props.childProps.courseID + "/enrolments/" + row.studentID;
+    } else {
+      mURL = "/teachers/me/courses/" + this.props.childProps.courseID + "/enrolments/" + row.studentID;
+    }
+    
+    const mEnrolment = {
+      enrolment: {
+        type: "normal"
+      }
+    }
+
+    await axios({
+      method:'put',
+      data: mEnrolment,
+      url: API_URI + mURL,
+      headers: {'Authorization': this.props.childProps.token}
+      })
+        .then(function(response) {
+          console.log(response);
+          successToastr("La operación se realizó con éxito.");
+          handleModalClose();
+        })
+        .catch(function (error) {
+          console.log(error);
+          errorToastr("No se pudo editar la información del alumno. Intente nuevamente.");
+        });
+
+    this.loadStudents();
+  }
+
+  handleClickAcceptStudent(cell, row) {
+    const modalProps = {
+      message: 'Estás seguro que deseas aceptar a ' + row.name + '? IMPORTANTE: Esta operación no se puede deshacer.',
+      messageTitle: 'Aceptar Alumno?',
+      type: 'confirmAccept',
+      handleClose: this.handleModalClose,
+      handleConfirmAction: () => this.handleAcceptStudent(row)
+    };
+
+    this.setState({ confirmModal: <ConfirmModal modalProps={modalProps}/> }); 
+  }
+
   render() {
     if (this.state.redirect) {
       return <Redirect push to={`${this.state.redirectTo}`} />;
     }
 
-    const handleClick = (cell,row) => this.handleClick(cell,row);
+    const handleClickAcceptStudent = (cell,row) => this.handleClickAcceptStudent(cell,row);
     const handleChangeApproval = (cell,row) => this.handleChangeApproval(cell,row);
 
     const options = {
@@ -238,11 +287,17 @@ export default class StudentsTable extends Component {
         defaultSortOrder: 'asc'  // default sort order
     };
 
-    function buttonFormatter(cell, row){
+    function statusFormatter(cell, row){
       return (
-        <Button className="submitButton" onClick={() => handleClick(cell,row)}>
-            <Glyphicon glyph="user" />&nbsp;
-        </Button>
+        <div>
+          <p>{cell}</p>
+          {cell === "Condicional"
+            ? <Button bsStyle="success" className="submitButton" onClick={() => handleClickAcceptStudent(cell,row)}>
+                <Glyphicon glyph="ok" /> Aceptar
+              </Button>
+            : <Fragment />
+          }
+        </div>
       );
     }
 
@@ -267,6 +322,8 @@ export default class StudentsTable extends Component {
       <div>
         {this.state.setGradeModal}
 
+        {this.state.confirmModal}
+
         <ToastContainer
           ref={ref => container = ref}
           className="toast-top-right"
@@ -276,8 +333,7 @@ export default class StudentsTable extends Component {
             <TableHeaderColumn dataField='studentID' hidden={ true } width='80' isKey={ true } headerAlign='center' dataAlign='center'>ID Alumno</TableHeaderColumn>
             <TableHeaderColumn dataField='name' dataSort={ true } headerAlign='center' dataAlign='center'>Nombre</TableHeaderColumn>
             <TableHeaderColumn dataField='studentNumber' dataSort={ true } width='100' headerAlign='center' dataAlign='center'>Padron</TableHeaderColumn>
-            <TableHeaderColumn dataField='status' width='100' headerAlign='center' dataAlign='center'>Condición</TableHeaderColumn>
-            <TableHeaderColumn dataField="button" width='100' headerAlign='center' dataAlign='center' dataFormat={buttonFormatter}>Acciones</TableHeaderColumn>
+            <TableHeaderColumn dataField='status' width='120' headerAlign='center' dataAlign='center' dataFormat={(cell, row) => statusFormatter(cell, row)}>Condición</TableHeaderColumn>
             <TableHeaderColumn dataField='approved' width='210' headerAlign='center' dataAlign='center' dataFormat={(cell, row) => approvedCheckboxFormatter(cell, row)}>Aprobado</TableHeaderColumn>
             <TableHeaderColumn dataField='grade' dataSort={ true } width='120' headerAlign='center' dataAlign='center'>Nota Cursada</TableHeaderColumn>
             <TableHeaderColumn dataField='examGrade' dataSort={ true } width='120' headerAlign='center' dataAlign='center'>Nota Examen</TableHeaderColumn>
