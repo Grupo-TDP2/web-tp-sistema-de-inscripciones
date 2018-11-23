@@ -1,0 +1,9 @@
+.enrolmentModalFlex {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+
+.enrolmentModalFlexItem {
+    align-self: flex-start;
+}

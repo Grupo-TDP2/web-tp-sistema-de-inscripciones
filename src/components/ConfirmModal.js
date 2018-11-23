@@ -27,6 +27,12 @@ export default class ConfirmModal extends Component {
               <Glyphicon glyph="thumbs-down" /> Desaprobar
             </Button>;
           break;
+        case 'confirmAccept':
+          confirmButton = 
+            <Button bsStyle="success" onClick={this.props.modalProps.handleConfirmAction}>
+              <Glyphicon glyph="ok" /> Aceptar
+            </Button>;
+          break;
         default:
           confirmButton = <div />;
           break;
