@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import {Modal, Button, Table} from 'react-bootstrap';
+import {Modal, Button, Glyphicon} from 'react-bootstrap';
 import Select from 'react-select';
 import API_URI from "../config/GeneralConfig.js";
 import axios from 'axios';
@@ -26,7 +26,7 @@ export default class EnrolmentModal extends Component {
       await axios({
         method:'get',
         url: API_URI + "/students",
-        headers: {'Authorization': this.props.childProps.token}
+        headers: {'Authorization': this.props.modalProps.token}
         })
           .then(function(response) {
             console.log(response);
@@ -36,7 +36,7 @@ export default class EnrolmentModal extends Component {
             response.data.forEach(student => {
               let mStudent = {
                 value: student.id,
-                label: student.first_name + " " + student.last_name + " - " + student.school_document_number;
+                label: student.first_name + " " + student.last_name + " - " + student.school_document_number
               }
 
               mAvailableStudents.push(mStudent);
@@ -58,7 +58,7 @@ export default class EnrolmentModal extends Component {
 
       return (
         <div>
-          <Modal show={this.state.show} onHide={this.props.childProps.handleClose}>
+          <Modal show={this.state.show} onHide={this.props.modalProps.handleClose}>
             <Modal.Header closeButton>
                <Modal.Title className="modalTitle">
                     Inscribir Alumno
@@ -68,7 +68,7 @@ export default class EnrolmentModal extends Component {
                 <div className="enrolmentModalFlex">
                   <p className="enrolmentModalFlexItem">Seleccione un alumno para inscribir:</p>
                   <Select
-                    className="basic-single modal-select sub-flex-item"
+                    className="basic-single enrolmentModalFlexItem enrolmentModalSelect"
                     classNamePrefix="select"
                     placeholder="Seleccione..."
                     noOptionsMessage={() => "No hay opciones."}
@@ -81,8 +81,12 @@ export default class EnrolmentModal extends Component {
                 </div>
             </Modal.Body>
             <Modal.Footer>
-                <Button onClick={this.props.childProps.handleNewStudent}>Inscribir</Button>
-                <Button onClick={this.props.childProps.handleClose}>Cancelar</Button>
+                <div className="enrolmentModalFooterFlex">
+                    <Button bsStyle="success" onClick={() => this.props.modalProps.handleNewStudent(this.state.newStudent)}>
+                        <Glyphicon glyph="edit" /> Inscribir
+                    </Button>
+                    <Button onClick={this.props.modalProps.handleClose}>Cancelar</Button>
+                </div>
             </Modal.Footer>
           </Modal>
         </div>

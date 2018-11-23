@@ -9,6 +9,7 @@ import API_URI from "../config/GeneralConfig.js";
 import SetGradeModal from "./SetGradeModal";
 import OptionsToggle from "./OptionsToggle";
 import ConfirmModal from './ConfirmModal';
+import EnrolmentModal from './EnrolmentModal';
 
 let container;
  
@@ -22,8 +23,7 @@ export default class StudentsTable extends Component {
         loaderMsg: 'Cargando la informacion...',
         redirect: false,
         redirectTo: '',
-        setGradeModal: '',
-        confirmModal: ''
+        modal: ''
     };
 
     this.customTitle = this.customTitle.bind(this);
@@ -36,6 +36,7 @@ export default class StudentsTable extends Component {
     this.handleSetGrade = this.handleSetGrade.bind(this);
     this.loadStudents = this.loadStudents.bind(this);
     this.customInsertButton = this.customInsertButton.bind(this);
+    this.handleAddNewStudent = this.handleAddNewStudent.bind(this);
     this.handleClickNewStudent = this.handleClickNewStudent.bind(this);
   }
 
@@ -117,7 +118,7 @@ export default class StudentsTable extends Component {
   }
 
   handleModalClose() {
-    this.setState({ setGradeModal: '', confirmModal: '' });
+    this.setState({ modal: '' });
   }
 
   async handleSetGrade(grade, studentID) {
@@ -156,7 +157,7 @@ export default class StudentsTable extends Component {
 
     this.loadStudents();
 
-    this.setState({ setGradeModal: '' });
+    this.setState({ modal: '' });
   }
 
   async handleChangeApproval(e, row) {
@@ -170,7 +171,7 @@ export default class StudentsTable extends Component {
         studentInfo: row
       }
 
-      this.setState({ setGradeModal: <SetGradeModal modalProps={modalProps}/>});
+      this.setState({ modal: <SetGradeModal modalProps={modalProps}/>});
     } else {
       const errorToastr = message => this.displayErrorToastr(message);
       const successToastr = message => this.displaySuccessToastr(message);
@@ -218,15 +219,65 @@ export default class StudentsTable extends Component {
     const handleClickNewStudent = () => this.handleClickNewStudent();
     return (
       <Button className="categories-table-button" bsStyle="success" onClick={handleClickNewStudent}>
-        <Glyphicon glyph="plus" /> Inscribir Alumno
+        <Glyphicon glyph="edit" /> Inscribir Alumno
       </Button>
     );
   }
 
-  handleClickNewStudent() {
-    console.log("HOLA");
+  async handleAddNewStudent(studentID) {
+    const errorToastr = message => this.displayErrorToastr(message);
+    const successToastr = message => this.displaySuccessToastr(message);
+    const handleModalClose = () => this.handleModalClose();
+
+    let mURL;
+
+    if (this.props.childProps.role === "Admin" || this.props.childProps.role === "DepartmentStaff") {
+      mURL = "/departments/" + this.props.childProps.departmentID + "/courses/" + this.props.childProps.courseID + "/enrolments";
+    } else {
+      mURL = "/teachers/me/courses/" + this.props.childProps.courseID + "/enrolments";
+    }
+    
+    const mEnrolment = {
+      enrolment: {
+        student_id: studentID
+      }
+    }
+
+    await axios({
+      method:'post',
+      data: mEnrolment,
+      url: API_URI + mURL,
+      headers: {'Authorization': this.props.childProps.token}
+      })
+        .then(function(response) {
+          console.log(response);
+          successToastr("La operación se realizó con éxito.");
+          handleModalClose();
+        })
+        .catch(function (error) {
+          console.log(error.response);
+          if (error.response.data.error.length > 0 && error.response.data.error[0].startsWith("Student")) {
+            errorToastr("El alumno ya se encuentra inscripto a este curso o a un curso de esta misma materia. Intente nuevamente.");  
+          } else if (error.response.data.error.length > 0 && error.response.data.error[0].startsWith("Created at must be in the previous week")) {
+            errorToastr("No se encuentra en un período válido para inscribir alumnos (una semana antes del comienzo de cursada). Vuelva a intentar en un período válido.");
+          } else {
+            errorToastr("Ocurrió un inconveniente al inscribir al alumno. Intente nuevamente.");
+          }
+        });
+
+    this.loadStudents();
   }
-  
+
+  handleClickNewStudent() {
+    const modalProps = {
+      token: this.props.childProps.token,
+      handleClose: this.handleModalClose,
+      handleNewStudent: this.handleAddNewStudent
+    };
+
+    this.setState({ modal: <EnrolmentModal modalProps={modalProps}/> }); 
+  }
+
   async handleAcceptStudent(row) {
     const errorToastr = message => this.displayErrorToastr(message);
     const successToastr = message => this.displaySuccessToastr(message);
@@ -274,7 +325,7 @@ export default class StudentsTable extends Component {
       handleConfirmAction: () => this.handleAcceptStudent(row)
     };
 
-    this.setState({ confirmModal: <ConfirmModal modalProps={modalProps}/> }); 
+    this.setState({ modal: <ConfirmModal modalProps={modalProps}/> }); 
   }
 
   render() {
@@ -336,9 +387,7 @@ export default class StudentsTable extends Component {
 
     return (
       <div>
-        {this.state.setGradeModal}
-
-        {this.state.confirmModal}
+        {this.state.modal}
 
         <ToastContainer
           ref={ref => container = ref}
