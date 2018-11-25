@@ -173,43 +173,47 @@ export default class PollReport extends Component {
   }
 
   handleSubjectClick(elems) {
-    const subject = this.state.reportData[elems[0]._index];
+    if (elems.length > 0) {
+        const subject = this.state.reportData[elems[0]._index];
 
-    const chartColors = setChartColors(subject.courses);
+        const chartColors = setChartColors(subject.courses);
 
-    this.setState({ 
-        subjectChartData: {
-            labels: subject.courses.map(course => course.course),
-            datasets: [
-                {
-                label: "Inscriptos (Curso)",
-                backgroundColor: chartColors.map(color => color["background"]),
-                borderColor: chartColors.map(color => color["border"]),
-                borderWidth: 1,
-                hoverBackgroundColor: chartColors.map(color => color["hoverBackground"]),
-                hoverBorderColor: chartColors.map(color => color["hoverBorder"]),
-                data: subject.courses.map(course => course.enrolments)
-                }
-            ]
-        },
-        subjectInfo: {
-            name: subject.subject,
-            enrolments: "Inscriptos: " + subject.enrolments,
-            teachers: "Docentes: " + subject.teachers,
-            coursesQuantity: "Cursos: " + subject.courses.length,
-            courses: subject.courses
-        },
-        courseInfo: {}
-    });
+        this.setState({ 
+            subjectChartData: {
+                labels: subject.courses.map(course => course.course),
+                datasets: [
+                    {
+                    label: "Inscriptos (Curso)",
+                    backgroundColor: chartColors.map(color => color["background"]),
+                    borderColor: chartColors.map(color => color["border"]),
+                    borderWidth: 1,
+                    hoverBackgroundColor: chartColors.map(color => color["hoverBackground"]),
+                    hoverBorderColor: chartColors.map(color => color["hoverBorder"]),
+                    data: subject.courses.map(course => course.enrolments)
+                    }
+                ]
+            },
+            subjectInfo: {
+                name: subject.subject,
+                enrolments: "Inscriptos: " + subject.enrolments,
+                teachers: "Docentes: " + subject.teachers,
+                coursesQuantity: "Cursos: " + subject.courses.length,
+                courses: subject.courses
+            },
+            courseInfo: {}
+        });
+    }
   }
 
   handleCourseClick(elems) {
-    this.setState({ courseInfo: {
-        course: this.state.subjectInfo.courses[elems[0]._index].course,
-        enrolments: "Inscriptos: " + this.state.subjectInfo.courses[elems[0]._index].enrolments,
-        teachersTitle: "Docentes: ",
-        teachers: this.state.subjectInfo.courses[elems[0]._index].teachers
-    }});
+    if (elems.length > 0) {
+        this.setState({ courseInfo: {
+            course: this.state.subjectInfo.courses[elems[0]._index].course,
+            enrolments: "Inscriptos: " + this.state.subjectInfo.courses[elems[0]._index].enrolments,
+            teachersTitle: "Docentes: ",
+            teachers: this.state.subjectInfo.courses[elems[0]._index].teachers
+        }});
+    }
   }
 
   render() {

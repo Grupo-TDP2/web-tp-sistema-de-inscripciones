@@ -93,7 +93,7 @@ class App extends Component {
                   <LinkContainer to="/teacherCourses" activeClassName="">
                     <NavItem>Cursos - Docente</NavItem>
                   </LinkContainer>
-                  <NavDropdown eventKey={3} title="Reportes" id="report-dropdown">
+                  <NavDropdown eventKey={3} title="Reportes" id="report-dropdown" className="navDropDown">
                     <LinkContainer to="/pollReport" activeClassName="">
                       <MenuItem eventKey={3.1}>Encuestas</MenuItem>
                     </LinkContainer>
@@ -118,7 +118,7 @@ class App extends Component {
                   <LinkContainer to="/importData" activeClassName="">
                     <NavItem>Carga de Datos</NavItem>
                   </LinkContainer>
-                  <NavDropdown eventKey={3} title="Reportes" id="report-dropdown">
+                  <NavDropdown eventKey={3} title="Reportes" id="report-dropdown" className="navDropDown">
                     <LinkContainer to="/pollReport" activeClassName="">
                       <MenuItem eventKey={3.1}>Encuestas</MenuItem>
                     </LinkContainer>

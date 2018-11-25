@@ -153,7 +153,9 @@ export default class PollReport extends Component {
   }
 
   handleCourseClick(elems) {
-    this.setState({ comments: this.state.polls.sort((a,b) => b.mean_rate - a.mean_rate)[elems[0]._index].comments });
+    if (elems.length > 0) {
+      this.setState({ comments: this.state.polls.sort((a,b) => b.mean_rate - a.mean_rate)[elems[0]._index].comments });
+    }
   }
 
   render() {

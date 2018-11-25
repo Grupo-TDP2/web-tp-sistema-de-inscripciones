@@ -11,3 +11,7 @@
 .customNavbar {
   margin-bottom: 0px;
 }
+
+.App .navDropDown {
+  z-index: 1001;
+}
