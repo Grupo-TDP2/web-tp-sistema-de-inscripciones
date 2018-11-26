@@ -1,0 +1,19 @@
+.enrolmentModalFlex {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+
+.enrolmentModalFlex .enrolmentModalFlexItem {
+    align-self: flex-start;
+}
+
+.enrolmentModalFlex .enrolmentModalSelect {
+    width: 100%;
+}
+
+.enrolmentModalFooterFlex {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+}

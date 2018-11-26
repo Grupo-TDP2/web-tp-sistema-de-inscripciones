@@ -122,7 +122,7 @@ export default class ExamsTable extends Component {
 
     let mURL;
 
-    if (this.props.childProps.role === "Admin") {
+    if (this.props.childProps.role === "Admin" || this.props.childProps.role === "DepartmentStaff") {
       mURL = "/departments/" + this.props.childProps.departmentID + "/courses/" + this.props.childProps.courseID + "/exams";
     } else {
       mURL = '/teachers/me/courses/' + this.props.childProps.courseID + '/exams';
@@ -212,7 +212,7 @@ export default class ExamsTable extends Component {
 
     let mURL;
 
-    if (this.props.childProps.role === "Admin") {
+    if (this.props.childProps.role === "Admin" || this.props.childProps.role === "DepartmentStaff") {
       mURL = "/departments/" + this.props.childProps.departmentID + "/courses/" + this.props.childProps.courseID + "/exams/" + row.examID;
     } else {
       mURL = '/teachers/me/courses/' + this.props.childProps.courseID + '/exams/' + row.examID;
@@ -262,14 +262,6 @@ export default class ExamsTable extends Component {
       final_exam_week_id: this.state.newExamWeekID,
       date_time: this.state.newDate.format('YYYY-MM-DD') + " " + this.state.newHour
     };
-
-    let mURL;
-
-    if (this.props.childProps.role === "Admin") {
-      mURL = "/departments/" + this.props.childProps.departmentID + "/courses/" + this.props.childProps.courseID + "/exams";
-    } else {
-      mURL = '/teachers/me/courses/' + this.props.childProps.courseID + '/exams';
-    }
 
     await axios({
       method:'post',

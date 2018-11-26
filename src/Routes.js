@@ -12,6 +12,8 @@ import SchoolTerms from "./containers/SchoolTerms";
 import ExamStudents from "./containers/ExamStudents";
 import ImportData from "./containers/ImportData";
 import ImportsHistory from "./containers/ImportsHistory";
+import PollReport from "./containers/PollReport";
+import SubjectReport from "./containers/SubjectReport";
 
 export default ({ childProps }) =>
   <Switch>
@@ -25,6 +27,8 @@ export default ({ childProps }) =>
     <AppliedRoute path="/schoolTerms" exact component={SchoolTerms} props={childProps} />
     <AppliedRoute path="/importData" exact component={ImportData} props={childProps} />
     <AppliedRoute path="/importsHistory" exact component={ImportsHistory} props={childProps} />
+    <AppliedRoute path="/pollReport" exact component={PollReport} props={childProps} />
+    <AppliedRoute path="/subjectReport" exact component={SubjectReport} props={childProps} />
     { /* Finally, catch all unmatched routes */ }
     <Route component={NotFound} />
   </Switch>;

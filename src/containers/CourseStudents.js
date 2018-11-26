@@ -1,6 +1,8 @@
 import React, { Component } from "react";
 import StudentsTable from "../components/StudentsTable"
 
+import "./CourseStudents.css";
+
 export default class CourseStudents extends Component {
 
   constructor(props) {
@@ -24,7 +26,7 @@ export default class CourseStudents extends Component {
       this.props.isAuthenticated &&
       <div>
         <h1>Alumnos Inscriptos - Curso</h1>
-        <h4><strong>Matería:</strong> {this.props.match.params.subject}</h4>
+        <h4 className="subTitle"><strong>Matería:</strong> {this.props.match.params.subject}</h4>
         <StudentsTable childProps={childProps}/>
       </div>
     );

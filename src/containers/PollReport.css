@@ -1,0 +1,22 @@
+.titleFlex {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+} 
+
+.titleFlex .mainTitle {
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.titleFlex .subtitle {
+    margin-top: 0px;
+    font-style: italic;
+}
+
+.selectFlex {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    margin-top: 20px;
+}

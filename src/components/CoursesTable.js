@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import { Redirect } from 'react-router-dom';
 import {BootstrapTable, TableHeaderColumn} from 'react-bootstrap-table';
 import axios from 'axios'
-import {Glyphicon, Button, ToggleButton, ToggleButtonGroup} from 'react-bootstrap';
+import {Glyphicon, Button} from 'react-bootstrap';
 import { ToastContainer } from "react-toastr";
 import "./Toastr.css";
 import "./CoursesTable.css";
@@ -40,11 +40,7 @@ export default class CoursesTable extends Component {
   async componentDidMount() {
     let mTeacherID = "me";
 
-    const errorToastr = message => this.displayErrorToastr(message);
-    const setLoaderMsg = mLoaderMsg => this.setState({ loaderMsg: mLoaderMsg });
-    const setCourses = mCourses => this.setState({courses: mCourses});
-
-    if (this.props.childProps.role === "Admin") {
+    if (this.props.childProps.role === "Admin" || this.props.childProps.role === "DepartmentStaff") {
       const setTeachers = (mTeachers, mTeacherID) => this.setState({ teacherList: mTeachers, teacherID: mTeacherID });
       const errorToastr = message => this.displayErrorToastr(message);
 
@@ -226,7 +222,7 @@ export default class CoursesTable extends Component {
 
     let mURL;
 
-    if (this.props.childProps.role === "Admin") {
+    if (this.props.childProps.role === "Admin" || this.props.childProps.role === "DepartmentStaff") {
       mURL = "/departments/" + row.department + "/courses/" + row.id;
     } else {
       mURL = '/teachers/me/courses/' + row.id;
@@ -326,7 +322,7 @@ export default class CoursesTable extends Component {
     return (
       <div>
         <div className="flexParent">
-          {this.props.childProps.role === 'Admin'
+          {this.props.childProps.role === 'Admin' || this.props.childProps.role === "DepartmentStaff"
             ? <div>
                 <h1>Cursos</h1>
                 <h4><strong>Docente</strong>{mTeacherName}</h4>
@@ -336,7 +332,7 @@ export default class CoursesTable extends Component {
               </div>
           }
 
-          {this.props.childProps.role === 'Admin'
+          {this.props.childProps.role === 'Admin' || this.props.childProps.role === "DepartmentStaff"
             ? <Select
                 className="departmentSelect"
                 classNamePrefix="select"

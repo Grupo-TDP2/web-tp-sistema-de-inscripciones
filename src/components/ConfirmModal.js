@@ -1,6 +1,5 @@
 import React, { Component } from "react";
-import {Modal, Button, Table, Glyphicon} from 'react-bootstrap';
-import Select from 'react-select';
+import {Modal, Button, Glyphicon} from 'react-bootstrap';
 import './TeachersModal.css';
 
 export default class ConfirmModal extends Component {
@@ -26,6 +25,12 @@ export default class ConfirmModal extends Component {
           confirmButton = 
             <Button bsStyle="danger" onClick={this.props.modalProps.handleConfirmAction}>
               <Glyphicon glyph="thumbs-down" /> Desaprobar
+            </Button>;
+          break;
+        case 'confirmAccept':
+          confirmButton = 
+            <Button bsStyle="success" onClick={this.props.modalProps.handleConfirmAction}>
+              <Glyphicon glyph="ok" /> Aceptar
             </Button>;
           break;
         default:

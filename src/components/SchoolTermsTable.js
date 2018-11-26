@@ -54,7 +54,6 @@ export default class SchoolTermsTable extends Component {
     const errorToastr = message => this.displayErrorToastr(message);
     const setLoaderMsg = mLoaderMsg => this.setState({ loaderMsg: mLoaderMsg });
     const setSchoolTerms = mSchoolTerms => this.setState({schoolTerms: mSchoolTerms});
-    const getTermMappings = () => this.termMappings;
 
     await axios({
       method:'get',
@@ -267,8 +266,8 @@ export default class SchoolTermsTable extends Component {
       const splitA = a.date_start.split("/");
       const splitB = b.date_start.split("/");
 
-      const newA = parseInt(splitA[2])*10000 + parseInt(splitA[1])*100 + parseInt(splitA[0]);
-      const newB = parseInt(splitB[2])*10000 + parseInt(splitB[1])*100 + parseInt(splitB[0]);
+      const newA = parseInt(splitA[2],10)*10000 + parseInt(splitA[1],10)*100 + parseInt(splitA[0],10);
+      const newB = parseInt(splitB[2],10)*10000 + parseInt(splitB[1],10)*100 + parseInt(splitB[0],10);
       
       if (order === 'desc') {
         return newA - newB;

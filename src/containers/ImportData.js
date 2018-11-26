@@ -122,7 +122,6 @@ export default class ImportData extends Component {
     }
 
     let reader = new FileReader();
-    let fileContent;
 
     reader.onload = function(e) {
         setFile(e.target.result);

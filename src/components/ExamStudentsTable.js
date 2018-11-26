@@ -34,6 +34,10 @@ export default class ExamStudentsTable extends Component {
         students: "/departments/" + this.props.childProps.departmentID + "/courses/" + this.props.childProps.courseID + "/exams/" + this.props.childProps.examID + "/student_exams",
         export: "/departments/" + this.props.childProps.departmentID + "/courses/" + this.props.childProps.courseID + "/exams/" + this.props.childProps.examID + "/student_exams/csv_format"
       },
+      "DepartmentStaff": {
+        students: "/departments/" + this.props.childProps.departmentID + "/courses/" + this.props.childProps.courseID + "/exams/" + this.props.childProps.examID + "/student_exams",
+        export: "/departments/" + this.props.childProps.departmentID + "/courses/" + this.props.childProps.courseID + "/exams/" + this.props.childProps.examID + "/student_exams/csv_format"
+      },
       "Teacher": {
         students: "/teachers/me/courses/" + this.props.childProps.courseID + "/exams/" + this.props.childProps.examID + "/student_exams",
         export: "/teachers/me/courses/" + this.props.childProps.courseID + "/exams/" + this.props.childProps.examID + "/student_exams/csv_format"
@@ -235,7 +239,7 @@ export default class ExamStudentsTable extends Component {
 
     let mURL;
 
-    if (this.props.childProps.role === "Admin") {
+    if (this.props.childProps.role === "Admin" || this.props.childProps.role === "DepartmentStaff") {
       mURL = "/departments/" + this.props.childProps.departmentID + "/courses/" + this.props.childProps.courseID + "/exams/" + this.props.childProps.examID + "/student_exams/" + studentID;
     } else {
       mURL = "/teachers/me/courses/" + this.props.childProps.courseID + "/exams/" + this.props.childProps.examID + "/student_exams/" + studentID;
